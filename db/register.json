@@ -1,0 +1,30 @@
+[
+  {
+    "bgCommission": 406526,
+    "id": "BG-2026-0001",
+    "bgNumber": "007GT02261190011",
+    "bgAmount": 25017000,
+    "remarks": "",
+    "siteName": "Patna",
+    "autoRenewal": false,
+    "requestId": "",
+    "issuingBank": "HDFC Bank",
+    "renewalAlertDate": "2027-04-30",
+    "releasedDate": "",
+    "effectiveDate": "2026-04-29",
+    "claimExpiryDate": "2028-05-30",
+    "costCenter": "",
+    "attachments": [],
+    "beneficiary": "Construction Division No.2, Building Construction Department, Patna",
+    "expiryDate": "2027-05-30",
+    "fdrNo": "",
+    "renewalInitiationDate": "2027-05-15",
+    "issueDate": "2026-04-29",
+    "bgType": "EMD",
+    "status": "Active",
+    "marginMoney": 2501700,
+    "lastUpdatedOn": "2026-07-29T11:20:57.102Z",
+    "lastUpdatedBy": "Finance Manager (Sumit Verma)",
+    "clientName": "Construction Division No.2, Building Construction Department, Patna"
+  }
+]
