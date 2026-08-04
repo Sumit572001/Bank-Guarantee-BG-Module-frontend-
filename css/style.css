@@ -275,8 +275,8 @@ body {
 
 /* Dynamic Views Container */
 .view-container {
-  padding: 40px;
-  max-width: 1400px;
+  padding: 30px 40px;
+  max-width: 96%;
   width: 100%;
   margin: 0 auto;
   flex-grow: 1;
@@ -521,14 +521,14 @@ th {
   font-size: 13px;
   color: var(--text-secondary);
   background-color: var(--bg-primary);
-  padding: 14px 20px;
+  padding: 14px 12px;
   border-bottom: 2px solid var(--border-color);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 td {
-  padding: 16px 20px;
+  padding: 16px 12px;
   font-size: 14px;
   color: var(--text-secondary);
   border-bottom: 1px solid var(--border-color);
@@ -538,6 +538,13 @@ td {
 tr:hover td {
   background-color: var(--color-primary-light);
   color: var(--text-primary);
+}
+
+.col-wrap {
+  white-space: normal !important;
+  min-width: 140px;
+  max-width: 265px;
+  word-break: break-word;
 }
 
 /* Badges */
@@ -913,4 +920,51 @@ tr:hover td {
 .attachment-link svg {
   width: 16px;
   height: 16px;
+}
+
+/* Compact file uploads grid */
+.compact-upload-box {
+  background-color: var(--bg-primary);
+  border: 1.5px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  transition: border-color var(--transition-fast);
+}
+
+.compact-upload-box:hover {
+  border-color: var(--color-primary);
+}
+
+.upload-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.file-input-compact {
+  font-size: 12px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.file-list-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Compact list table */
+table.style-compact th {
+  padding: 10px 12px;
+  font-size: 12px;
+}
+
+table.style-compact td {
+  padding: 10px 12px;
+  font-size: 13px;
 }

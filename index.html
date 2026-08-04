@@ -55,11 +55,28 @@
         </a>
       </li>
       <li>
+        <a class="menu-item" id="nav-raise-renewal" onclick="switchView('raise-renewal')">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+          </svg>
+          Raise BG Renewal
+        </a>
+      </li>
+      <li>
         <a class="menu-item" id="nav-reports" onclick="switchView('reports')">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
           </svg>
           Reports & Alerts
+        </a>
+      </li>
+      <li>
+        <a class="menu-item" id="nav-cost-center-report" onclick="switchView('cost-center-report')">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z" />
+          </svg>
+          Cost Centre Report
         </a>
       </li>
     </ul>
@@ -109,7 +126,7 @@
             <div class="metric-info">
               <span class="metric-label">Outstanding BGs</span>
               <span class="metric-value" id="dashboard-outstanding-count">0</span>
-              <span class="metric-subtext">Active & Expired BGs</span>
+              <span class="metric-subtext">Active guarantees</span>
             </div>
             <div class="metric-icon-wrapper">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -245,13 +262,21 @@
 
               <div class="form-group">
                 <label for="req-bg-type">BG Type Required <span style="color: var(--color-danger);">*</span></label>
-                <select id="req-bg-type" class="form-control" required>
+                <select id="req-bg-type" class="form-control" required onchange="toggleCostCenterField('req-cost-center-select', 'req-cost-center-input', this.value)">
                   <option value="EMD">EMD (Earnest Money Deposit)</option>
                   <option value="Performance">Performance BG</option>
                   <option value="Mobilisation Advance">Mobilisation Advance BG</option>
                   <option value="Retention">Retention Money BG</option>
                   <option value="Security Deposit">Security Deposit</option>
                 </select>
+              </div>
+
+              <div class="form-group" id="req-cost-center-group">
+                <label id="req-cost-center-label">Cost Center <span style="color: var(--color-danger);">*</span></label>
+                <select id="req-cost-center-select" class="form-control" style="display: none;">
+                  <!-- Dynamically populated via JS -->
+                </select>
+                <input type="text" id="req-cost-center-input" class="form-control" placeholder="e.g. Pune Project Office">
               </div>
 
               <div class="form-group">
@@ -275,8 +300,18 @@
               </div>
 
               <div class="form-group">
-                <label for="req-beneficiary-bank">Beneficiary Bank Details</label>
-                <input type="text" id="req-beneficiary-bank" class="form-control" placeholder="IFSC, Account Number, Bank Name">
+                <label for="req-beneficiary-bank-name">Beneficiary Bank Name <span style="color: var(--color-danger);">*</span></label>
+                <input type="text" id="req-beneficiary-bank-name" class="form-control" placeholder="e.g. HDFC Bank" required>
+              </div>
+
+              <div class="form-group">
+                <label for="req-beneficiary-bank-account">Beneficiary Account Number <span style="color: var(--color-danger);">*</span></label>
+                <input type="text" id="req-beneficiary-bank-account" class="form-control" placeholder="e.g. 50100234591" required>
+              </div>
+
+              <div class="form-group">
+                <label for="req-beneficiary-bank-ifsc">Beneficiary Bank IFSC <span style="color: var(--color-danger);">*</span></label>
+                <input type="text" id="req-beneficiary-bank-ifsc" class="form-control" placeholder="e.g. HDFC0000060" required>
               </div>
 
               <div class="form-group">
@@ -299,15 +334,33 @@
 
               <!-- Attachments upload -->
               <div class="form-group full-width">
-                <label>Attachments (BG Draft Word file, Tender Document, LOI Copy)</label>
-                <div class="file-upload-container" id="request-file-zone">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
-                  </svg>
-                  <p>Drag & Drop files or click to browse</p>
-                  <input type="file" id="req-file-input" multiple onchange="handleFileSelect(event, 'request-files-list')">
+                <label style="font-weight: 700; margin-bottom: 8px;">Upload Attachments</label>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                  <!-- 1. BG Draft -->
+                  <div class="compact-upload-box">
+                    <span class="upload-label">BG Draft <span style="color: var(--color-danger);">*</span></span>
+                    <input type="file" id="req-file-bg-draft" class="file-input-compact" onchange="handleCategoryFileSelect(event, 'BG Draft', 'req-list-bg-draft')">
+                    <div class="file-list-compact" id="req-list-bg-draft"></div>
+                  </div>
+                  <!-- 2. LOI Copy / Tender Document -->
+                  <div class="compact-upload-box">
+                    <span class="upload-label">LOI Copy / Tender Document <span style="color: var(--color-danger);">*</span></span>
+                    <input type="file" id="req-file-loi" class="file-input-compact" onchange="handleCategoryFileSelect(event, 'LOI Copy / Tender Document', 'req-list-loi')">
+                    <div class="file-list-compact" id="req-list-loi"></div>
+                  </div>
+                  <!-- 3. Tender Checklist -->
+                  <div class="compact-upload-box">
+                    <span class="upload-label">Tender Checklist <span style="color: var(--color-danger);">*</span></span>
+                    <input type="file" id="req-file-checklist" class="file-input-compact" onchange="handleCategoryFileSelect(event, 'Tender Checklist', 'req-list-checklist')">
+                    <div class="file-list-compact" id="req-list-checklist"></div>
+                  </div>
+                  <!-- 4. Others -->
+                  <div class="compact-upload-box">
+                    <span class="upload-label">Others</span>
+                    <input type="file" id="req-file-others" class="file-input-compact" onchange="handleCategoryFileSelect(event, 'Others', 'req-list-others')">
+                    <div class="file-list-compact" id="req-list-others"></div>
+                  </div>
                 </div>
-                <div class="file-list" id="request-files-list"></div>
               </div>
 
             </div>
@@ -363,19 +416,28 @@
       <section id="view-register" class="view-section">
         
         <div class="card-panel">
-          <div class="panel-header">
+          <div class="panel-header" style="flex-wrap: wrap; gap: 10px;">
             <h2>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
               </svg>
               Centralized Bank Guarantee Register
             </h2>
-            <button class="btn btn-primary" id="btn-register-new-bg" onclick="openRegisterModal(null)" style="display: none;">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 18px; height: 18px;">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-              </svg>
-              Register Manual BG
-            </button>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <input type="text" id="register-search" class="filter-control" placeholder="🔍  Search BG No, Beneficiary..." oninput="filterRegisterTable(this.value)" style="min-width:230px; height:35px;">
+              <button class="btn btn-success btn-sm" onclick="exportRegisterCsv()" style="height:35px; padding: 0 14px;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:15px; height:15px;">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+                Export CSV
+              </button>
+              <button class="btn btn-primary" id="btn-register-new-bg" onclick="openRegisterModal(null)" style="display: none; height:35px;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 18px; height: 18px;">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Register Manual BG
+              </button>
+            </div>
           </div>
 
           <div class="table-wrapper">
@@ -507,6 +569,184 @@
 
       </section>
 
+      <!-- 6. RAISE BG RENEWAL VIEW -->
+      <section id="view-raise-renewal" class="view-section">
+        
+        <div class="card-panel">
+          <div class="panel-header">
+            <h2>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+              </svg>
+              Raise Bank Guarantee (BG) Renewal Request Form
+            </h2>
+          </div>
+          
+          <form id="raise-bg-renewal-form" onsubmit="submitBgRenewalRequest(event)">
+            <div class="form-grid">
+              
+              <div class="form-group">
+                <label for="ren-bg-select">Select BG Number to Renew <span style="color: var(--color-danger);">*</span></label>
+                <select id="ren-bg-select" class="form-control" required onchange="handleRenewalBgSelect(this.value)">
+                  <!-- Populated dynamically with active/expired BGs -->
+                </select>
+              </div>
+
+              <!-- Read-only auto-fetched details -->
+              <div class="form-group">
+                <label>Current Expiry Date</label>
+                <input type="text" id="ren-lbl-current-expiry" class="form-control" readonly style="background-color: var(--border-color); font-weight: 600;">
+              </div>
+
+              <div class="form-group">
+                <label>Current BG Amount</label>
+                <input type="text" id="ren-lbl-current-amount" class="form-control" readonly style="background-color: var(--border-color); font-weight: 600;">
+              </div>
+
+              <div class="form-group">
+                <label>Beneficiary</label>
+                <input type="text" id="ren-lbl-beneficiary" class="form-control" readonly style="background-color: var(--border-color);">
+              </div>
+
+              <div class="form-group">
+                <label>Project / Site Reference</label>
+                <input type="text" id="ren-lbl-project-ref" class="form-control" readonly style="background-color: var(--border-color);">
+              </div>
+
+              <div class="form-group">
+                <label>Issuing Bank</label>
+                <input type="text" id="ren-lbl-issuing-bank" class="form-control" readonly style="background-color: var(--border-color);">
+              </div>
+
+              <!-- Inputs for renewal -->
+              <div class="form-group">
+                <label for="ren-new-expiry">New Expiry Date <span style="color: var(--color-danger);">*</span></label>
+                <input type="date" id="ren-new-expiry" class="form-control" required>
+              </div>
+
+              <div class="form-group">
+                <label for="ren-duration">Revised BG Duration <span style="color: var(--color-danger);">*</span></label>
+                <input type="text" id="ren-duration" class="form-control" placeholder="e.g. Extended by 12 Months" required>
+              </div>
+
+              <div class="form-group full-width">
+                <label for="ren-remarks">Renewal Remarks / Justification</label>
+                <textarea id="ren-remarks" class="form-control" rows="3" placeholder="Enter remarks or justification for the renewal..."></textarea>
+              </div>
+
+              <!-- Attachments upload categorized -->
+              <div class="form-group full-width">
+                <label style="font-weight: 700; margin-bottom: 8px;">Upload Renewal Attachments</label>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                  <div class="compact-upload-box">
+                    <span class="upload-label">LOI / Extension Order <span style="color: var(--color-danger);">*</span></span>
+                    <input type="file" id="ren-file-loi" class="file-input-compact" onchange="handleCategoryFileSelect(event, 'LOI Copy / Tender Document', 'ren-list-loi')">
+                    <div class="file-list-compact" id="ren-list-loi"></div>
+                  </div>
+                  <div class="compact-upload-box">
+                    <span class="upload-label">BG Draft (Renewed)</span>
+                    <input type="file" id="ren-file-bg-draft" class="file-input-compact" onchange="handleCategoryFileSelect(event, 'BG Draft', 'ren-list-bg-draft')">
+                    <div class="file-list-compact" id="ren-list-bg-draft"></div>
+                  </div>
+                  <div class="compact-upload-box">
+                    <span class="upload-label">Others</span>
+                    <input type="file" id="ren-file-others" class="file-input-compact" onchange="handleCategoryFileSelect(event, 'Others', 'ren-list-others')">
+                    <div class="file-list-compact" id="ren-list-others"></div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            
+            <div style="margin-top: 30px; display: flex; justify-content: flex-end; gap: 12px;">
+              <button type="button" class="btn btn-secondary" onclick="switchView('dashboard')">Cancel</button>
+              <button type="submit" class="btn btn-primary">Submit Renewal Request</button>
+            </div>
+          </form>
+        </div>
+
+      </section>
+
+      <!-- 7. COST CENTRE REPORT VIEW -->
+      <section id="view-cost-center-report" class="view-section">
+        
+        <!-- Filters Panel -->
+        <div class="filters-panel" style="margin-bottom: 24px;">
+          <div class="filter-item">
+            <label for="cc-report-select">Select Cost Center</label>
+            <select id="cc-report-select" class="filter-control" onchange="loadCostCenterReport(this.value)">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+          <div class="filter-item" style="flex: 0; min-width: 150px;">
+            <button class="btn btn-success" onclick="exportCostCenterCsv()" style="width: 100%; height: 35px; padding: 0 10px;">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              </svg>
+              Export Report
+            </button>
+          </div>
+        </div>
+
+        <!-- Cost Center Summary Cards -->
+        <div class="metrics-grid" style="margin-bottom: 24px;">
+          <div class="metric-card primary">
+            <div class="metric-info">
+              <span class="metric-label">Active Guarantees</span>
+              <span class="metric-value" id="cc-total-count">0</span>
+              <span class="metric-subtext">Count of active/expired BGs</span>
+            </div>
+          </div>
+          <div class="metric-card success">
+            <div class="metric-info">
+              <span class="metric-label">Total Value</span>
+              <span class="metric-value" id="cc-total-value">₹0</span>
+              <span class="metric-subtext">Sum of guarantee amounts</span>
+            </div>
+          </div>
+          <div class="metric-card info">
+            <div class="metric-info">
+              <span class="metric-label">Blocked Margin Money</span>
+              <span class="metric-value" id="cc-total-margin">₹0</span>
+              <span class="metric-subtext">Locked FDR capital</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table Panel -->
+        <div class="card-panel">
+          <div class="panel-header">
+            <h2>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+              </svg>
+              Cost Center Wise Bank Guarantees
+            </h2>
+          </div>
+
+          <div class="table-wrapper">
+            <table id="cc-report-table">
+              <thead>
+                <tr>
+                  <th>BG Ref ID</th>
+                  <th>BG Number</th>
+                  <th>Type</th>
+                  <th>Beneficiary</th>
+                  <th>Issuing Bank</th>
+                  <th>Amount</th>
+                  <th>Expiry Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="cc-report-tbody">
+                <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Please select a Cost Center above.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
     </div>
 
   </main>
@@ -535,7 +775,7 @@
 
             <div class="form-group">
               <label for="bg-form-type">BG Type <span style="color: var(--color-danger);">*</span></label>
-              <select id="bg-form-type" class="form-control" required>
+              <select id="bg-form-type" class="form-control" required onchange="toggleCostCenterField('bg-form-cost-center-select', 'bg-form-cost-center-input', this.value)">
                 <option value="EMD">EMD</option>
                 <option value="Performance">Performance BG</option>
                 <option value="Mobilisation Advance">Mobilisation Advance BG</option>
@@ -561,7 +801,12 @@
 
             <div class="form-group">
               <label for="bg-form-bank">Issuing Bank <span style="color: var(--color-danger);">*</span></label>
-              <input type="text" id="bg-form-bank" class="form-control" placeholder="e.g. HDFC Bank Ltd" required>
+              <select id="bg-form-bank" class="form-control" required>
+                <option value="HDFC Bank">HDFC Bank</option>
+                <option value="ICICI Bank">ICICI Bank</option>
+                <option value="Axis Bank">Axis Bank</option>
+                <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
+              </select>
             </div>
 
             <div class="form-group">
@@ -604,9 +849,12 @@
               <input type="text" id="bg-form-fdr-no" class="form-control" placeholder="FDR reference number">
             </div>
 
-            <div class="form-group">
-              <label for="bg-form-cost-center">Cost Center</label>
-              <input type="text" id="bg-form-cost-center" class="form-control" placeholder="Accounting Cost Center">
+            <div class="form-group" id="bg-form-cost-center-group">
+              <label id="bg-form-cost-center-label">Cost Center <span style="color: var(--color-danger);">*</span></label>
+              <select id="bg-form-cost-center-select" class="form-control" style="display: none;">
+                <!-- Dynamically populated via JS -->
+              </select>
+              <input type="text" id="bg-form-cost-center-input" class="form-control" placeholder="Accounting Cost Center">
             </div>
 
             <div class="form-group">
@@ -662,6 +910,75 @@
 
           </div>
         </form>
+
+        <!-- BG Amendments Section (Visible only when editing an existing BG) -->
+        <div id="bg-amendments-section" style="display: none; border-top: 1px solid var(--border-color); padding-top: 24px; margin-top: 24px;">
+          <h4 style="font-family: var(--font-heading); font-size: 16px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <span>BG Amendments History</span>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-toggle-amendment-form" onclick="toggleAmendmentForm(true)">+ Add Amendment</button>
+          </h4>
+          
+          <!-- Add Amendment Sub-form -->
+          <div id="amendment-form-panel" style="display: none; background-color: var(--bg-primary); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 16px;">
+            <h5 style="font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 12px;">Record New Amendment</h5>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+              <div class="form-group">
+                <label for="amd-date">Amendment Date <span style="color: var(--color-danger);">*</span></label>
+                <input type="date" id="amd-date" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="amd-amount">Revised BG Amount (₹)</label>
+                <input type="number" id="amd-amount" class="form-control" placeholder="Revised total value" min="1" step="any">
+              </div>
+              <div class="form-group">
+                <label for="amd-expiry">Revised Expiry Date</label>
+                <input type="date" id="amd-expiry" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="amd-duration">Revised Duration</label>
+                <input type="text" id="amd-duration" class="form-control" placeholder="e.g. Extended by 6 mos">
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label for="amd-details">Amendment Description / Remarks <span style="color: var(--color-danger);">*</span></label>
+                <textarea id="amd-details" class="form-control" rows="2" placeholder="Describe the amendment (e.g. extension, amount value change)..."></textarea>
+              </div>
+              <div class="form-group style-file" style="grid-column: 1 / -1;">
+                <label>Amendment Attachments (Amendment Copy, Bank Letters)</label>
+                <div class="file-upload-container" style="padding: 12px;" id="amd-file-zone">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px; margin-bottom: 4px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
+                  </svg>
+                  <p style="font-size: 12px;">Browse or drag files here</p>
+                  <input type="file" id="amd-file-input" multiple onchange="handleFileSelect(event, 'amd-files-list')">
+                </div>
+                <div class="file-list" id="amd-files-list"></div>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="toggleAmendmentForm(false)">Cancel</button>
+              <button type="button" class="btn btn-primary btn-sm" onclick="saveAmdSubForm()">Apply Amendment</button>
+            </div>
+          </div>
+
+          <!-- Amendments List Table -->
+          <div class="table-wrapper">
+            <table class="style-compact" style="font-size: 13px;">
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Revised Amount</th>
+                  <th>Revised Expiry</th>
+                  <th>Attachments</th>
+                </tr>
+              </thead>
+              <tbody id="amendments-list-tbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
       
       <div class="modal-footer">
