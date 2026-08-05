@@ -1,6 +1,12 @@
 // App State
 const API_URL = ''; // Same domain for API calls
 let currentRole = 'Finance Manager';
+let currentUser = {
+  isLoggedIn: true,
+  name: 'Sumit Verma',
+  email: 'sumit.verma@highrise.com',
+  role: 'Finance Manager'
+};
 let allRequests = [];
 let allRegister = [];
 let pendingFiles = [];
@@ -17,7 +23,6 @@ const COST_CENTERS = [
 
 // DOM Elements cache
 const viewTitle = document.getElementById('view-title');
-const userRoleSelect = document.getElementById('user-role-select');
 const userRoleDisplay = document.getElementById('user-role-display');
 const userAvatarInitials = document.getElementById('user-avatar-initials');
 
@@ -63,11 +68,11 @@ function populateCostCenters() {
     document.getElementById('bg-form-cost-center-select'),
     document.getElementById('cc-report-select')
   ];
-  
+
   selects.forEach(select => {
     if (!select) return;
     select.innerHTML = '';
-    
+
     // Add empty option first for the report filter
     if (select.id === 'cc-report-select') {
       const emptyOpt = document.createElement('option');
@@ -75,7 +80,7 @@ function populateCostCenters() {
       emptyOpt.textContent = '-- Select Cost Center --';
       select.appendChild(emptyOpt);
     }
-    
+
     COST_CENTERS.forEach(cc => {
       const opt = document.createElement('option');
       opt.value = cc;
@@ -90,7 +95,7 @@ function toggleCostCenterField(selectId, inputId, bgType) {
   const select = document.getElementById(selectId);
   const input = document.getElementById(inputId);
   if (!select || !input) return;
-  
+
   if (bgType === 'EMD') {
     select.style.display = 'none';
     select.required = false;
@@ -104,23 +109,119 @@ function toggleCostCenterField(selectId, inputId, bgType) {
   }
 }
 
+// Auth State & System Handlers
+function initAuthState() {
+  const saved = localStorage.getItem('highrise_bg_user');
+  if (saved) {
+    try {
+      currentUser = JSON.parse(saved);
+    } catch(e) {}
+  }
+  updateAuthUI();
+}
+
+function updateAuthUI() {
+  const signedInBox = document.getElementById('user-signed-in-box');
+  const signedOutBox = document.getElementById('user-signed-out-box');
+  const lockScreen = document.getElementById('logged-out-lockscreen');
+  const headerProfile = document.getElementById('header-user-profile');
+  const headerSigninBtn = document.getElementById('header-signin-btn');
+
+  const nameDisplay = document.getElementById('user-name-display');
+  const roleDisplay = document.getElementById('user-role-display');
+  const avatarDisplay = document.getElementById('user-avatar-initials');
+
+  const footerName = document.getElementById('footer-user-name');
+  const footerRole = document.getElementById('footer-user-role');
+  const footerAvatar = document.getElementById('footer-user-avatar');
+
+  if (currentUser && currentUser.isLoggedIn) {
+    if (signedInBox) signedInBox.style.display = 'flex';
+    if (signedOutBox) signedOutBox.style.display = 'none';
+    if (lockScreen) lockScreen.style.display = 'none';
+    if (headerProfile) headerProfile.style.display = 'flex';
+    if (headerSigninBtn) headerSigninBtn.style.display = 'none';
+
+    // Compute initials from name
+    const initials = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'US';
+
+    if (nameDisplay) nameDisplay.textContent = currentUser.name;
+    if (roleDisplay) roleDisplay.textContent = currentUser.role;
+    if (avatarDisplay) avatarDisplay.textContent = initials;
+
+    if (footerName) footerName.textContent = currentUser.name;
+    if (footerRole) footerRole.textContent = currentUser.role;
+    if (footerAvatar) footerAvatar.textContent = initials;
+
+    handleRoleChange(currentUser.role);
+  } else {
+    if (signedInBox) signedInBox.style.display = 'none';
+    if (signedOutBox) signedOutBox.style.display = 'flex';
+    if (lockScreen) lockScreen.style.display = 'flex';
+    if (headerProfile) headerProfile.style.display = 'none';
+    if (headerSigninBtn) headerSigninBtn.style.display = 'inline-flex';
+  }
+}
+
+function openSignInModal() {
+  const modal = document.getElementById('signin-modal');
+  if (modal) modal.classList.add('active');
+}
+
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) modal.classList.remove('active');
+}
+
+function handleSignInSubmit(event) {
+  event.preventDefault();
+  const usernameInput = document.getElementById('signin-username').value.trim();
+  const roleInput = document.getElementById('signin-role').value;
+
+  currentUser = {
+    isLoggedIn: true,
+    name: usernameInput || 'Sumit Verma',
+    email: usernameInput.includes('@') ? usernameInput : `${usernameInput.toLowerCase().replace(/\s+/g, '.')}@highrise.com`,
+    role: roleInput
+  };
+
+  localStorage.setItem('highrise_bg_user', JSON.stringify(currentUser));
+  updateAuthUI();
+  closeModal('signin-modal');
+
+  // Trigger view reload
+  const activeSection = document.querySelector('.view-section.active');
+  if (activeSection) {
+    const viewId = activeSection.id.replace('view-', '');
+    switchView(viewId);
+  }
+}
+
+function handleSignOut() {
+  if (confirm('Are you sure you want to sign out of Highrise BG Module?')) {
+    currentUser.isLoggedIn = false;
+    localStorage.setItem('highrise_bg_user', JSON.stringify(currentUser));
+    updateAuthUI();
+  }
+}
+
 // Initializer
 window.addEventListener('DOMContentLoaded', () => {
-  // Select initial role from dropdown
-  handleRoleChange(userRoleSelect.value);
-  
+  // Initialize Auth State & UI
+  initAuthState();
+
   // Set default dates
   const today = new Date().toISOString().split('T')[0];
   const reqDueDateInput = document.getElementById('req-due-date');
   if (reqDueDateInput) reqDueDateInput.min = today;
-  
+
   // Populate cost center lists
   populateCostCenters();
-  
+
   // Initialize cost center view fields to match default EMD selection
   toggleCostCenterField('req-cost-center-select', 'req-cost-center-input', 'EMD');
   toggleCostCenterField('bg-form-cost-center-select', 'bg-form-cost-center-input', 'EMD');
-  
+
   // Load initial view
   switchView('dashboard');
 });
@@ -131,20 +232,20 @@ function switchView(viewId) {
   document.querySelectorAll('.view-section').forEach(section => {
     section.classList.remove('active');
   });
-  
+
   // Deactivate all navigation items
   document.querySelectorAll('.menu-item').forEach(item => {
     item.classList.remove('active');
   });
-  
+
   // Show target section
   const targetSection = document.getElementById(`view-${viewId}`);
   if (targetSection) targetSection.classList.add('active');
-  
+
   // Activate target menu item
   const targetMenuItem = document.getElementById(`nav-${viewId}`);
   if (targetMenuItem) targetMenuItem.classList.add('active');
-  
+
   // Update Header Title
   switch (viewId) {
     case 'dashboard':
@@ -178,47 +279,37 @@ function switchView(viewId) {
       initCostCenterReport();
       break;
   }
-  
+
   // Scroll to top
   document.querySelector('.main-content').scrollTop = 0;
 }
 
-// Handle User Role Change Simulation
+// Handle User Role Change Simulation / Auth Role Sync
 function handleRoleChange(role) {
   currentRole = role;
-  userRoleDisplay.textContent = role;
-  
-  // Avatar Initials
-  if (role === 'Tender Team') {
-    userAvatarInitials.textContent = 'TT';
-    userAvatarInitials.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
-  } else if (role === 'Finance Manager') {
-    userAvatarInitials.textContent = 'FM';
-    userAvatarInitials.style.background = 'linear-gradient(135deg, #3b82f6, #1d4ed8)';
-  } else {
-    userAvatarInitials.textContent = 'CA';
-    userAvatarInitials.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+  if (userRoleDisplay) userRoleDisplay.textContent = role;
+
+  // Avatar Initials & Gradient based on role
+  if (userAvatarInitials) {
+    if (role === 'Tender Team') {
+      userAvatarInitials.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+    } else if (role === 'Finance Manager') {
+      userAvatarInitials.style.background = 'linear-gradient(135deg, #3b82f6, #1d4ed8)';
+    } else {
+      userAvatarInitials.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+    }
   }
-  
+
   // Manage role warning panel
   const reqWarning = document.getElementById('role-warning-request');
   if (reqWarning) {
     reqWarning.style.display = (role === 'Tender Team' || role === 'Contracts Admin') ? 'none' : 'flex';
   }
-  
+
   // Show / Hide buttons based on permissions
   const btnRegisterNew = document.getElementById('btn-register-new-bg');
   if (btnRegisterNew) {
     btnRegisterNew.style.display = (role === 'Finance Manager' || role === 'Contracts Admin') ? 'inline-flex' : 'none';
-  }
-  
-  // Refresh current view logic (e.g. enabling/disabling action buttons)
-  const activeSection = document.querySelector('.view-section.active');
-  if (activeSection) {
-    const viewId = activeSection.id.replace('view-', '');
-    if (viewId === 'requests-tracker') loadRequests();
-    if (viewId === 'register') loadRegister();
-    if (viewId === 'dashboard') loadDashboard();
   }
 }
 
@@ -226,25 +317,25 @@ function handleRoleChange(role) {
 function handleCategoryFileSelect(event, category, listId) {
   const files = event.target.files;
   const listContainer = document.getElementById(listId);
-  
+
   if (!files || files.length === 0) return;
-  
+
   // For singular categories (anything other than 'Others'), clear existing files in this category
   if (category !== 'Others') {
     pendingFiles = pendingFiles.filter(f => f.category !== category);
     listContainer.innerHTML = '';
   }
-  
+
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
-    
+
     // Read file as base64
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
       const base64Data = e.target.result;
-      
+
       const fileId = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      
+
       // Save in pending files array with category metadata
       pendingFiles.push({
         id: fileId,
@@ -253,7 +344,7 @@ function handleCategoryFileSelect(event, category, listId) {
         data: base64Data,
         category: category
       });
-      
+
       renderFileBadge(file.name, fileId, listContainer);
     };
     reader.readAsDataURL(file);
@@ -262,19 +353,19 @@ function handleCategoryFileSelect(event, category, listId) {
 function handleFileSelect(event, listId) {
   const files = event.target.files;
   const listContainer = document.getElementById(listId);
-  
+
   if (!files || files.length === 0) return;
-  
+
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
-    
+
     // Read file as base64
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
       const base64Data = e.target.result;
-      
+
       const fileId = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      
+
       // Save in pending files array
       pendingFiles.push({
         id: fileId,
@@ -282,7 +373,7 @@ function handleFileSelect(event, listId) {
         type: file.type,
         data: base64Data
       });
-      
+
       // Render file badge
       renderFileBadge(file.name, fileId, listContainer);
     };
@@ -294,10 +385,10 @@ function renderFileBadge(name, fileId, listContainer) {
   const item = document.createElement('div');
   item.className = 'file-item';
   item.id = `file-item-${fileId}`;
-  
+
   // Truncate name
   const displayName = name.length > 30 ? name.substr(0, 20) + '...' + name.substr(name.length - 8) : name;
-  
+
   item.innerHTML = `
     <span class="file-item-name">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:16px; height:16px;">
@@ -333,28 +424,28 @@ function resetRequestForm() {
 function handleExpiryDateChange(expiryDateStr) {
   const lblAlert = document.getElementById('lbl-auto-alert-date');
   const lblInit = document.getElementById('lbl-auto-init-date');
-  
+
   if (!expiryDateStr) {
     lblAlert.textContent = 'Select Expiry Date';
     lblInit.textContent = 'Select Expiry Date';
     return;
   }
-  
+
   const expiry = new Date(expiryDateStr);
   if (isNaN(expiry.getTime())) {
     lblAlert.textContent = 'Invalid Expiry Date';
     lblInit.textContent = 'Invalid Expiry Date';
     return;
   }
-  
+
   // Renewal Alert Date: Expiry - 30 days
   const alertDate = new Date(expiry);
   alertDate.setDate(expiry.getDate() - 30);
-  
+
   // Renewal Initiation Date: Expiry - 15 days
   const initDate = new Date(expiry);
   initDate.setDate(expiry.getDate() - 15);
-  
+
   lblAlert.textContent = formatDate(alertDate.toISOString().split('T')[0]);
   lblInit.textContent = formatDate(initDate.toISOString().split('T')[0]);
 }
@@ -362,7 +453,7 @@ function handleExpiryDateChange(expiryDateStr) {
 function handleStatusChange(status) {
   const groupReleasedDate = document.getElementById('group-released-date');
   const releasedDateInput = document.getElementById('bg-form-released-date');
-  
+
   if (status === 'Released' || status === 'Cancelled') {
     groupReleasedDate.style.display = 'flex';
     releasedDateInput.required = true;
@@ -404,15 +495,15 @@ async function fetchApi(endpoint, options = {}) {
 async function loadDashboard() {
   const dashboardData = await fetchApi('/api/dashboard');
   if (!dashboardData) return;
-  
+
   // Set Metric Cards
   document.getElementById('dashboard-outstanding-count').textContent = dashboardData.outstandingCount;
   document.getElementById('dashboard-total-amount').textContent = formatCurrency(dashboardData.totalAmount);
   document.getElementById('dashboard-margin-money').textContent = formatCurrency(dashboardData.totalMarginMoney);
-  
+
   const urgentAlertsBadge = document.getElementById('dashboard-urgent-alerts');
   urgentAlertsBadge.textContent = dashboardData.urgentCount;
-  
+
   const metricUrgentCard = document.getElementById('metric-expiry-alerts');
   if (dashboardData.urgentCount > 0) {
     metricUrgentCard.className = 'metric-card danger';
@@ -423,7 +514,7 @@ async function loadDashboard() {
   // Renders Recent Table
   const tbody = document.getElementById('dashboard-recent-tbody');
   tbody.innerHTML = '';
-  
+
   if (!dashboardData.recentBgs || dashboardData.recentBgs.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No guarantees registered yet.</td></tr>`;
   } else {
@@ -443,18 +534,18 @@ async function loadDashboard() {
       tbody.appendChild(tr);
     });
   }
-  
+
   // Render Expiry Renewal Alerts Panel (sidebar of dashboard)
   const alertList = document.getElementById('dashboard-alert-list');
   alertList.innerHTML = '';
-  
+
   // Fetch full register to find expiring items
   const register = await fetchApi('/api/register');
   allRegister = register;
-  
+
   const activeBgs = register.filter(bg => bg.status === 'Active' || bg.status === 'Expired');
   const now = new Date();
-  
+
   // Find BGs expired or expiring within 45 days
   const alerts = [];
   activeBgs.forEach(bg => {
@@ -462,7 +553,7 @@ async function loadDashboard() {
     const exp = new Date(bg.expiryDate);
     const diffTime = exp.getTime() - now.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays <= 0) {
       alerts.push({ bg, days: diffDays, severity: 'urgent', text: `EXPIRED on ${formatDate(bg.expiryDate)}` });
     } else if (diffDays <= 15) {
@@ -471,7 +562,7 @@ async function loadDashboard() {
       alerts.push({ bg, days: diffDays, severity: 'warning', text: `Expires in ${diffDays} days (${formatDate(bg.expiryDate)})` });
     }
   });
-  
+
   if (alerts.length === 0) {
     alertList.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 13px;">No critical renewal alerts.</div>`;
   } else {
@@ -503,13 +594,13 @@ async function loadDashboard() {
 // 2. BG Requests View
 async function submitBgRequest(event) {
   event.preventDefault();
-  
+
   const submitBtn = document.getElementById('btn-submit-request');
   submitBtn.disabled = true;
   submitBtn.textContent = 'Submitting Request...';
-  
+
   const bgType = document.getElementById('req-bg-type').value;
-  
+
   // Verify required attachments
   const requiredCategories = ['BG Draft', 'LOI Copy / Tender Document', 'Tender Checklist'];
   for (const cat of requiredCategories) {
@@ -521,12 +612,12 @@ async function submitBgRequest(event) {
       return;
     }
   }
-  
+
   // Get Cost Center value based on EMD vs non-EMD
-  const costCenterVal = (bgType === 'EMD') 
-    ? document.getElementById('req-cost-center-input').value 
+  const costCenterVal = (bgType === 'EMD')
+    ? document.getElementById('req-cost-center-input').value
     : document.getElementById('req-cost-center-select').value;
-    
+
   const payload = {
     projectRef: document.getElementById('req-project-ref').value,
     bgType: bgType,
@@ -544,13 +635,13 @@ async function submitBgRequest(event) {
     requestedBy: `${userRoleDisplay.textContent} (Sumit Verma)`,
     attachments: pendingFiles // holds base64 payloads + category metadata
   };
-  
+
   try {
     const res = await fetchApi('/api/requests', {
       method: 'POST',
       body: JSON.stringify(payload)
     });
-    
+
     if (res.success) {
       alert(`Bank Guarantee Request submitted successfully!\nRequest ID: ${res.request.id}`);
       resetRequestForm();
@@ -568,21 +659,21 @@ async function submitBgRequest(event) {
 async function loadRequests() {
   const requests = await fetchApi('/api/requests');
   allRequests = requests;
-  
+
   const tbody = document.getElementById('requests-tracker-tbody');
   tbody.innerHTML = '';
-  
+
   if (requests.length === 0) {
     tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: var(--text-muted);">No requests raised yet.</td></tr>`;
     return;
   }
-  
+
   // Sort requests by newest first
   const sortedRequests = [...requests].reverse();
-  
+
   sortedRequests.forEach(req => {
     const tr = document.createElement('tr');
-    
+
     // Attachments link markup
     let attachmentsMarkup = 'None';
     if (req.attachments && req.attachments.length > 0) {
@@ -594,12 +685,12 @@ async function loadRequests() {
         </a>
       `).join(' ');
     }
-    
+
     // Action items based on roles and approval workflows
     let actionMarkup = '<i>No actions available</i>';
-    
+
     const isAuthorizeToApprove = currentRole === 'Finance Manager' || currentRole === 'Contracts Admin';
-    
+
     if (req.status === 'Pending') {
       if (isAuthorizeToApprove) {
         actionMarkup = `
@@ -616,7 +707,7 @@ async function loadRequests() {
     } else {
       actionMarkup = `<span style="font-size:12px; color: var(--text-muted);">Handled by ${req.approvedBy || 'Admin'}</span>`;
     }
-    
+
     tr.style.cursor = 'pointer';
     tr.onclick = () => openDetailModal('request', req.id);
     tr.innerHTML = `
@@ -639,18 +730,18 @@ async function updateRequestStatus(id, newStatus) {
   if (!confirm(`Are you sure you want to change status to "${newStatus}" for Request ${id}?`)) {
     return;
   }
-  
+
   const payload = {
     id: id,
     status: newStatus,
     approvedBy: `${currentRole} (Sumit Verma)`
   };
-  
+
   const res = await fetchApi('/api/requests', {
     method: 'PUT',
     body: JSON.stringify(payload)
   });
-  
+
   if (res.success) {
     if (newStatus === 'Approved') {
       alert(`Request Approved!\nA draft entry has been automatically created in the BG Register.`);
@@ -665,23 +756,23 @@ async function updateRequestStatus(id, newStatus) {
 async function loadRegister() {
   const register = await fetchApi('/api/register');
   allRegister = register;
-  
+
   const tbody = document.getElementById('register-tbody');
   tbody.innerHTML = '';
-  
+
   if (register.length === 0) {
     tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: var(--text-muted);">No guarantees registered yet.</td></tr>`;
     return;
   }
-  
+
   const sortedRegister = [...register].reverse();
-  
+
   const today = new Date();
-  today.setHours(0,0,0,0);
-  
+  today.setHours(0, 0, 0, 0);
+
   sortedRegister.forEach(bg => {
     const tr = document.createElement('tr');
-    
+
     // Compute effective status — auto-detect expired based on date
     let effectiveStatus = bg.status;
     if ((bg.status === 'Active') && bg.expiryDate) {
@@ -690,11 +781,11 @@ async function loadRegister() {
         effectiveStatus = 'Expired';
       }
     }
-    
+
     // Action buttons based on role
     let actionMarkup = '';
     const hasWritePermission = currentRole === 'Finance Manager' || currentRole === 'Contracts Admin';
-    
+
     if (hasWritePermission) {
       actionMarkup = `
         <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); openRegisterModal('${bg.id}')">
@@ -707,7 +798,7 @@ async function loadRegister() {
     } else {
       actionMarkup = `<button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); openDetailModal('bg', '${bg.id}')">View Details</button>`;
     }
-    
+
     // FDR & Margin description
     let fdrDetails = '<i>None</i>';
     if (bg.fdrNo || bg.marginMoney) {
@@ -718,12 +809,12 @@ async function loadRegister() {
         </div>
       `;
     }
-    
+
     // Amendment count badge
     const amdCount = (bg.amendments && bg.amendments.length > 0)
       ? `<span style="font-size:11px; background:var(--color-primary); color:#fff; border-radius:10px; padding:1px 7px; margin-left:4px;">${bg.amendments.length} Amd</span>`
       : '';
-    
+
     tr.style.cursor = 'pointer';
     tr.onclick = () => openDetailModal('bg', bg.id);
     tr.setAttribute('data-search', [
@@ -760,27 +851,27 @@ function exportRegisterCsv() {
     alert('No BG records available to export.');
     return;
   }
-  
+
   const today = new Date();
-  today.setHours(0,0,0,0);
-  
-  const headers = ['BG Ref ID','BG Number','BG Type','Beneficiary','Client / Project','Site Name','Issuing Bank','Issue Date','Expiry Date','Amount','Commission','Margin Money','FDR No','Cost Center','Status','Amendments Count','Remarks'];
+  today.setHours(0, 0, 0, 0);
+
+  const headers = ['BG Ref ID', 'BG Number', 'BG Type', 'Beneficiary', 'Client / Project', 'Site Name', 'Issuing Bank', 'Issue Date', 'Expiry Date', 'Amount', 'Commission', 'Margin Money', 'FDR No', 'Cost Center', 'Status', 'Amendments Count', 'Remarks'];
   let csv = headers.join(',') + '\n';
-  
+
   allRegister.forEach(bg => {
     let effectiveStatus = bg.status;
     if (bg.status === 'Active' && bg.expiryDate) {
       const expDate = new Date(bg.expiryDate);
       if (!isNaN(expDate.getTime()) && expDate < today) effectiveStatus = 'Expired';
     }
-    
+
     const row = [
       bg.id,
       bg.bgNumber || '',
       bg.bgType,
-      `"${(bg.beneficiary||'').replace(/"/g,'""')}"`,
-      `"${(bg.clientName||'').replace(/"/g,'""')}"`,
-      `"${(bg.siteName||'').replace(/"/g,'""')}"`,
+      `"${(bg.beneficiary || '').replace(/"/g, '""')}"`,
+      `"${(bg.clientName || '').replace(/"/g, '""')}"`,
+      `"${(bg.siteName || '').replace(/"/g, '""')}"`,
       bg.issuingBank || '',
       bg.issueDate || '',
       bg.expiryDate || '',
@@ -788,14 +879,14 @@ function exportRegisterCsv() {
       bg.bgCommission || 0,
       bg.marginMoney || 0,
       bg.fdrNo || '',
-      `"${(bg.costCenter||'').replace(/"/g,'""')}"`,
+      `"${(bg.costCenter || '').replace(/"/g, '""')}"`,
       effectiveStatus,
       (bg.amendments && bg.amendments.length) || 0,
-      `"${(bg.remarks||'').replace(/"/g,'""')}"`
+      `"${(bg.remarks || '').replace(/"/g, '""')}"`
     ];
     csv += row.join(',') + '\n';
   });
-  
+
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -820,31 +911,31 @@ function applyFilters() {
   const status = document.getElementById('filter-status').value;
   const bankText = document.getElementById('filter-bank').value.toLowerCase();
   const expiryFilter = document.getElementById('filter-expiry').value;
-  
+
   const now = new Date();
   const thirtyDays = new Date();
   thirtyDays.setDate(now.getDate() + 30);
   const ninetyDays = new Date();
   ninetyDays.setDate(now.getDate() + 90);
-  
+
   const filtered = allRegister.filter(bg => {
     // Search filter
-    const matchesSearch = !searchText || 
+    const matchesSearch = !searchText ||
       String(bg.id || '').toLowerCase().includes(searchText) ||
       String(bg.bgNumber || '').toLowerCase().includes(searchText) ||
       String(bg.beneficiary || '').toLowerCase().includes(searchText) ||
       String(bg.clientName || '').toLowerCase().includes(searchText) ||
       String(bg.siteName || '').toLowerCase().includes(searchText);
-      
+
     // Type filter
     const matchesType = !bgType || bg.bgType === bgType;
-    
+
     // Status filter
     const matchesStatus = !status || bg.status === status;
-    
+
     // Bank filter
     const matchesBank = !bankText || String(bg.issuingBank || '').toLowerCase().includes(bankText);
-    
+
     // Expiry filter
     let matchesExpiry = true;
     if (expiryFilter) {
@@ -861,22 +952,22 @@ function applyFilters() {
         }
       }
     }
-    
+
     return matchesSearch && matchesType && matchesStatus && matchesBank && matchesExpiry;
   });
-  
+
   // Update UI Counter
   document.getElementById('report-summary-counts').textContent = `Total BGs Found: ${filtered.length}`;
-  
+
   // Render report records
   const tbody = document.getElementById('report-tbody');
   tbody.innerHTML = '';
-  
+
   if (filtered.length === 0) {
     tbody.innerHTML = `<tr><td colspan="13" style="text-align: center; color: var(--text-muted);">No records match the selected filters.</td></tr>`;
     return;
   }
-  
+
   filtered.forEach(bg => {
     const tr = document.createElement('tr');
     tr.style.cursor = 'pointer';
@@ -917,22 +1008,22 @@ function exportToCsvSimulation() {
   const status = document.getElementById('filter-status').value;
   const bankText = document.getElementById('filter-bank').value.toLowerCase();
   const expiryFilter = document.getElementById('filter-expiry').value;
-  
+
   const now = new Date();
   const thirtyDays = new Date();
   thirtyDays.setDate(now.getDate() + 30);
   const ninetyDays = new Date();
   ninetyDays.setDate(now.getDate() + 90);
-  
+
   const filtered = allRegister.filter(bg => {
-    const matchesSearch = !searchText || 
+    const matchesSearch = !searchText ||
       String(bg.id || '').toLowerCase().includes(searchText) ||
       String(bg.bgNumber || '').toLowerCase().includes(searchText) ||
       String(bg.beneficiary || '').toLowerCase().includes(searchText);
     const matchesType = !bgType || bg.bgType === bgType;
     const matchesStatus = !status || bg.status === status;
     const matchesBank = !bankText || String(bg.issuingBank || '').toLowerCase().includes(bankText);
-    
+
     let matchesExpiry = true;
     if (expiryFilter) {
       if (!bg.expiryDate) {
@@ -954,9 +1045,9 @@ function exportToCsvSimulation() {
 
   // Construct CSV String
   const headers = ['BG Ref ID', 'BG Number', 'BG Type', 'Beneficiary', 'Client Name', 'Issuing Bank', 'Issue Date', 'Effective Date', 'Expiry Date', 'Claim Expiry Date', 'BG Amount', 'Commission Paid', 'Margin Money', 'FDR No', 'Cost Center', 'Status', 'Renewal Alert Date', 'Renewal Initiation Date', 'Remarks'];
-  
+
   let csvContent = headers.join(',') + '\n';
-  
+
   filtered.forEach(bg => {
     const row = [
       bg.id,
@@ -1000,7 +1091,7 @@ let activeAmendments = [];
 
 function closeModal(modalId) {
   document.getElementById(modalId).classList.remove('active');
-  
+
   // Clear any forms or arrays
   if (modalId === 'register-bg-modal') {
     document.getElementById('register-bg-form').reset();
@@ -1017,7 +1108,7 @@ function closeModal(modalId) {
 function openRegisterModal(bgId = null) {
   const modal = document.getElementById('register-bg-modal');
   const titleAction = document.getElementById('modal-title-action');
-  
+
   // Reset Form
   document.getElementById('register-bg-form').reset();
   document.getElementById('bg-files-list').innerHTML = '';
@@ -1026,19 +1117,19 @@ function openRegisterModal(bgId = null) {
   document.getElementById('amd-files-list').innerHTML = '';
   activeAmendments = [];
   pendingFiles = [];
-  
+
   // Default values
   document.getElementById('bg-form-status').value = 'Active';
   handleStatusChange('Active');
-  
+
   if (bgId) {
     // EDIT RECORD
     titleAction.textContent = `Edit Bank Guarantee - ${bgId}`;
-    
+
     // Find BG in our loaded registry list
     const bg = allRegister.find(b => b.id === bgId);
     if (!bg) return;
-    
+
     document.getElementById('bg-form-id').value = bg.id;
     document.getElementById('bg-form-request-id').value = bg.requestId || '';
     document.getElementById('bg-form-number').value = bg.bgNumber || '';
@@ -1059,7 +1150,7 @@ function openRegisterModal(bgId = null) {
     document.getElementById('bg-form-auto-renewal').checked = !!bg.autoRenewal;
     document.getElementById('bg-form-released-date').value = bg.releasedDate || '';
     document.getElementById('bg-form-remarks').value = bg.remarks || '';
-    
+
     // Setup cost center field toggling and values
     toggleCostCenterField('bg-form-cost-center-select', 'bg-form-cost-center-input', bg.bgType);
     if (bg.bgType === 'EMD') {
@@ -1067,16 +1158,16 @@ function openRegisterModal(bgId = null) {
     } else {
       document.getElementById('bg-form-cost-center-select').value = bg.costCenter || COST_CENTERS[0];
     }
-    
+
     // Populate amendments history
     activeAmendments = bg.amendments || [];
     document.getElementById('bg-amendments-section').style.display = 'block';
     renderAmendmentsTable(activeAmendments);
-    
+
     // Handle conditional displays
     handleStatusChange(bg.status);
     handleExpiryDateChange(bg.expiryDate);
-    
+
     // Render existing files
     if (bg.attachments && bg.attachments.length > 0) {
       const existingContainer = document.getElementById('bg-existing-files');
@@ -1100,18 +1191,18 @@ function openRegisterModal(bgId = null) {
     titleAction.textContent = 'Register Bank Guarantee';
     document.getElementById('bg-form-id').value = '';
     document.getElementById('bg-form-request-id').value = '';
-    
+
     // Toggle Cost Center field as select by default (for EMD)
     toggleCostCenterField('bg-form-cost-center-select', 'bg-form-cost-center-input', 'EMD');
-    
+
     // Hide amendments section
     document.getElementById('bg-amendments-section').style.display = 'none';
-    
+
     // Clear auto calc labels
     document.getElementById('lbl-auto-alert-date').textContent = 'Select Expiry Date';
     document.getElementById('lbl-auto-init-date').textContent = 'Select Expiry Date';
   }
-  
+
   modal.classList.add('active');
 }
 
@@ -1120,7 +1211,7 @@ function toggleAmendmentForm(show) {
   const panel = document.getElementById('amendment-form-panel');
   if (!panel) return;
   panel.style.display = show ? 'block' : 'none';
-  
+
   if (show) {
     document.getElementById('amd-date').value = new Date().toISOString().split('T')[0];
     document.getElementById('amd-amount').value = document.getElementById('bg-form-amount').value;
@@ -1139,18 +1230,18 @@ function saveAmdSubForm() {
   const revisedAmount = parseFloat(document.getElementById('amd-amount').value) || 0;
   const revisedExpiryDate = document.getElementById('amd-expiry').value;
   const revisedDuration = document.getElementById('amd-duration').value;
-  
+
   if (!date || !description) {
     alert("Please fill in the Amendment Date and Description.");
     return;
   }
-  
+
   // Extract files uploaded for this amendment
   const amendmentFiles = pendingFiles.filter(f => f.category === 'Amendment');
-  
+
   // Remove these files from main pending files list so they aren't double uploaded
   pendingFiles = pendingFiles.filter(f => f.category !== 'Amendment');
-  
+
   const newAmd = {
     id: 'AMD-' + Date.now(),
     date: date,
@@ -1160,9 +1251,9 @@ function saveAmdSubForm() {
     revisedDuration: revisedDuration,
     attachments: amendmentFiles // base64 attachments specific to this amendment
   };
-  
+
   activeAmendments.push(newAmd);
-  
+
   // Automatically update main BG values to reflect the latest amendment
   document.getElementById('bg-form-amount').value = revisedAmount;
   document.getElementById('bg-form-expiry-date').value = revisedExpiryDate;
@@ -1170,10 +1261,10 @@ function saveAmdSubForm() {
     // If a duration was specified, update notes/remarks
     document.getElementById('bg-form-remarks').value = `Amended on ${formatDate(date)}: ${description}\n` + document.getElementById('bg-form-remarks').value;
   }
-  
+
   // Re-render amendments list table
   renderAmendmentsTable(activeAmendments);
-  
+
   // Close the amendment form
   toggleAmendmentForm(false);
 }
@@ -1183,15 +1274,15 @@ function renderAmendmentsTable(amendments) {
   const tbody = document.getElementById('amendments-list-tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
-  
+
   if (!amendments || amendments.length === 0) {
     tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No amendments recorded yet.</td></tr>`;
     return;
   }
-  
+
   amendments.forEach((amd, idx) => {
     const tr = document.createElement('tr');
-    
+
     let attachmentsMarkup = 'None';
     if (amd.attachments && amd.attachments.length > 0) {
       attachmentsMarkup = amd.attachments.map(att => `
@@ -1202,7 +1293,7 @@ function renderAmendmentsTable(amendments) {
         </a>
       `).join(' ');
     }
-    
+
     tr.innerHTML = `
       <td><b>${idx + 1}</b></td>
       <td>${formatDate(amd.date)}</td>
@@ -1221,20 +1312,20 @@ async function submitRegisterForm() {
     form.reportValidity();
     return;
   }
-  
+
   const submitBtn = document.getElementById('btn-submit-bg-form');
   submitBtn.disabled = true;
   submitBtn.textContent = 'Saving details...';
-  
+
   const id = document.getElementById('bg-form-id').value;
   const method = id ? 'PUT' : 'POST';
   const bgType = document.getElementById('bg-form-type').value;
-  
+
   // Get Cost Center value based on EMD vs non-EMD
-  const costCenterVal = (bgType === 'EMD') 
-    ? document.getElementById('bg-form-cost-center-input').value 
+  const costCenterVal = (bgType === 'EMD')
+    ? document.getElementById('bg-form-cost-center-input').value
     : document.getElementById('bg-form-cost-center-select').value;
-    
+
   const payload = {
     id: id || undefined,
     requestId: document.getElementById('bg-form-request-id').value || undefined,
@@ -1261,17 +1352,17 @@ async function submitRegisterForm() {
     amendments: activeAmendments, // send complete history including newly applied amendments
     newAttachments: pendingFiles // base64 attachments if any
   };
-  
+
   try {
     const res = await fetchApi('/api/register', {
       method: method,
       body: JSON.stringify(payload)
     });
-    
+
     if (res.success) {
       alert(`Bank Guarantee details saved successfully!`);
       closeModal('register-bg-modal');
-      
+
       const activeSection = document.querySelector('.view-section.active');
       if (activeSection) {
         const viewId = activeSection.id.replace('view-', '');
@@ -1295,10 +1386,10 @@ async function openDetailModal(type, id) {
   const modal = document.getElementById('detail-view-modal');
   const title = document.getElementById('detail-modal-title');
   const body = document.getElementById('detail-modal-body');
-  
+
   body.innerHTML = 'Loading record...';
   modal.classList.add('active');
-  
+
   if (type === 'request') {
     title.textContent = `Request Details - ${id}`;
     const req = allRequests.find(r => r.id === id);
@@ -1306,7 +1397,7 @@ async function openDetailModal(type, id) {
       body.innerHTML = 'Record not found.';
       return;
     }
-    
+
     let attachmentsMarkup = '<i>No documents attached</i>';
     if (req.attachments && req.attachments.length > 0) {
       // Group attachments by category
@@ -1332,7 +1423,7 @@ async function openDetailModal(type, id) {
         </div>
       `).join('');
     }
-    
+
     body.innerHTML = `
       <div style="display:flex; flex-direction:column; gap:16px;">
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
@@ -1426,7 +1517,7 @@ async function openDetailModal(type, id) {
       body.innerHTML = 'Record not found.';
       return;
     }
-    
+
     let attachmentsMarkup = '<i>No documents attached</i>';
     if (bg.attachments && bg.attachments.length > 0) {
       attachmentsMarkup = bg.attachments.map(att => `
@@ -1440,7 +1531,7 @@ async function openDetailModal(type, id) {
         </div>
       `).join('');
     }
-    
+
     body.innerHTML = `
       <div style="display:flex; flex-direction:column; gap:16px;">
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
@@ -1565,7 +1656,7 @@ async function openDetailModal(type, id) {
               ${bg.amendments.map((amd, idx) => `
                 <div style="background-color: var(--bg-primary); padding:10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); font-size:13px;">
                   <div style="display:flex; justify-content:space-between; font-weight:600; color: var(--text-primary); margin-bottom:4px;">
-                    <span>Amendment #${idx+1} (${formatDate(amd.date)})</span>
+                    <span>Amendment #${idx + 1} (${formatDate(amd.date)})</span>
                     <span>${amd.revisedAmount ? formatCurrency(amd.revisedAmount) : ''}</span>
                   </div>
                   <div style="color:var(--text-secondary); font-size:12.5px;">${amd.description}</div>
@@ -1592,30 +1683,30 @@ async function openDetailModal(type, id) {
 function resetRenewalForm() {
   const form = document.getElementById('raise-bg-renewal-form');
   if (form) form.reset();
-  
+
   // Clear read-only fields
   document.getElementById('ren-lbl-current-expiry').value = '';
   document.getElementById('ren-lbl-current-amount').value = '';
   document.getElementById('ren-lbl-beneficiary').value = '';
   document.getElementById('ren-lbl-project-ref').value = '';
   document.getElementById('ren-lbl-issuing-bank').value = '';
-  
+
   // Clear file lists
   const lists = ['ren-list-loi', 'ren-list-bg-draft', 'ren-list-others'];
   lists.forEach(id => {
     const list = document.getElementById(id);
     if (list) list.innerHTML = '';
   });
-  
+
   pendingFiles = [];
-  
+
   // Load active BGs into the renewal select dropdown
   const select = document.getElementById('ren-bg-select');
   if (select) {
     select.innerHTML = '<option value="">-- Choose BG Number --</option>';
     // Only display active or expired BGs that actually have a BG Number assigned
     const eligibleBgs = allRegister.filter(bg => (bg.status === 'Active' || bg.status === 'Expired') && bg.bgNumber);
-    
+
     if (eligibleBgs.length === 0) {
       const opt = document.createElement('option');
       opt.value = '';
@@ -1641,7 +1732,7 @@ function handleRenewalBgSelect(bgId) {
     document.getElementById('ren-lbl-issuing-bank').value = '';
     return;
   }
-  
+
   const bg = allRegister.find(b => b.id === bgId);
   if (bg) {
     document.getElementById('ren-lbl-current-expiry').value = formatDate(bg.expiryDate);
@@ -1649,7 +1740,7 @@ function handleRenewalBgSelect(bgId) {
     document.getElementById('ren-lbl-beneficiary').value = bg.beneficiary || '';
     document.getElementById('ren-lbl-project-ref').value = bg.siteName || '';
     document.getElementById('ren-lbl-issuing-bank').value = bg.issuingBank || '';
-    
+
     // Set min date of new expiry date to be the day after current expiry date if possible
     if (bg.expiryDate) {
       const expDate = new Date(bg.expiryDate);
@@ -1661,27 +1752,27 @@ function handleRenewalBgSelect(bgId) {
 
 async function submitBgRenewalRequest(event) {
   event.preventDefault();
-  
+
   const bgId = document.getElementById('ren-bg-select').value;
   if (!bgId) {
     alert("Please select a Bank Guarantee to renew.");
     return;
   }
-  
+
   const bg = allRegister.find(b => b.id === bgId);
   if (!bg) return;
-  
+
   // Verify required LOI file is uploaded
   const hasLoiFile = pendingFiles.some(f => f.category === 'LOI Copy / Tender Document');
   if (!hasLoiFile) {
     alert("Validation Error: Please upload the required 'LOI / Extension Order' attachment.");
     return;
   }
-  
+
   const newExpiry = document.getElementById('ren-new-expiry').value;
   const duration = document.getElementById('ren-duration').value;
   const remarks = document.getElementById('ren-remarks').value;
-  
+
   const payload = {
     requestType: 'Renewal',
     bgNumberToRenew: bg.bgNumber,
@@ -1693,7 +1784,7 @@ async function submitBgRenewalRequest(event) {
     dueDate: newExpiry, // due date is the target new expiry date
     beneficiaryName: bg.beneficiary,
     beneficiaryAddress: bg.clientName || '',
-    beneficiaryBankName: '', 
+    beneficiaryBankName: '',
     beneficiaryBankAccount: '',
     beneficiaryBankIfsc: '',
     duration: duration,
@@ -1702,13 +1793,13 @@ async function submitBgRenewalRequest(event) {
     requestedBy: `${currentRole} (Sumit Verma)`,
     attachments: pendingFiles
   };
-  
+
   try {
     const res = await fetchApi('/api/requests', {
       method: 'POST',
       body: JSON.stringify(payload)
     });
-    
+
     if (res.success) {
       alert(`Bank Guarantee Renewal Request submitted successfully!\nRequest ID: ${res.request.id}`);
       resetRenewalForm();
@@ -1724,13 +1815,13 @@ async function submitBgRenewalRequest(event) {
 function initCostCenterReport() {
   const select = document.getElementById('cc-report-select');
   if (!select) return;
-  
+
   // Save current selection if any
   const previousValue = select.value;
-  
+
   // Populate cost center options
   populateCostCenters();
-  
+
   if (previousValue && COST_CENTERS.includes(previousValue)) {
     select.value = previousValue;
     loadCostCenterReport(previousValue);
@@ -1751,19 +1842,19 @@ async function loadCostCenterReport(costCenter) {
     document.getElementById('cc-report-tbody').innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Please select a Cost Center above.</td></tr>`;
     return;
   }
-  
+
   // Fetch register database
   const register = await fetchApi('/api/register');
   allRegister = register;
-  
+
   // Filter for matching cost centers (excluding EMDs since they aren't bound to cost centers)
   const filteredBgs = register.filter(bg => bg.costCenter === costCenter && bg.bgType !== 'EMD');
-  
+
   // Update summaries
   let totalCount = 0;
   let totalValue = 0.0;
   let totalMargin = 0.0;
-  
+
   filteredBgs.forEach(bg => {
     if (bg.status === 'Active' || bg.status === 'Expired') {
       totalCount++;
@@ -1771,20 +1862,20 @@ async function loadCostCenterReport(costCenter) {
       totalMargin += parseFloat(bg.marginMoney) || 0;
     }
   });
-  
+
   document.getElementById('cc-total-count').textContent = totalCount;
   document.getElementById('cc-total-value').textContent = formatCurrency(totalValue);
   document.getElementById('cc-total-margin').textContent = formatCurrency(totalMargin);
-  
+
   // Render records
   const tbody = document.getElementById('cc-report-tbody');
   tbody.innerHTML = '';
-  
+
   if (filteredBgs.length === 0) {
     tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No Bank Guarantees recorded for this Cost Center.</td></tr>`;
     return;
   }
-  
+
   filteredBgs.forEach(bg => {
     const tr = document.createElement('tr');
     tr.style.cursor = 'pointer';
@@ -1809,16 +1900,16 @@ function exportCostCenterCsv() {
     alert("Please select a Cost Center to export.");
     return;
   }
-  
+
   const filteredBgs = allRegister.filter(bg => bg.costCenter === costCenter && bg.bgType !== 'EMD');
   if (filteredBgs.length === 0) {
     alert("No records to export.");
     return;
   }
-  
+
   const headers = ['BG Ref ID', 'BG Number', 'BG Type', 'Beneficiary', 'Issuing Bank', 'Issue Date', 'Expiry Date', 'Amount (₹)', 'Margin Money (₹)', 'FDR No', 'Status', 'Remarks'];
   let csvContent = headers.join(',') + '\n';
-  
+
   filteredBgs.forEach(bg => {
     const row = [
       bg.id,
@@ -1836,7 +1927,7 @@ function exportCostCenterCsv() {
     ];
     csvContent += row.join(',') + '\n';
   });
-  
+
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
