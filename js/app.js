@@ -2,10 +2,7 @@
 const API_URL = ''; // Same domain for API calls
 let currentRole = 'Finance Manager';
 let currentUser = {
-  isLoggedIn: true,
-  name: 'Sumit Verma',
-  email: 'sumit.verma@highrise.com',
-  role: 'Finance Manager'
+  isLoggedIn: false
 };
 let allRequests = [];
 let allRegister = [];
@@ -115,7 +112,7 @@ function initAuthState() {
   if (saved) {
     try {
       currentUser = JSON.parse(saved);
-    } catch(e) {}
+    } catch (e) { }
   }
   updateAuthUI();
 }
@@ -136,73 +133,87 @@ function updateAuthUI() {
   const footerAvatar = document.getElementById('footer-user-avatar');
 
   if (currentUser && currentUser.isLoggedIn) {
+    document.body.classList.remove('auth-page');
     if (signedInBox) signedInBox.style.display = 'flex';
     if (signedOutBox) signedOutBox.style.display = 'none';
     if (lockScreen) lockScreen.style.display = 'none';
     if (headerProfile) headerProfile.style.display = 'flex';
     if (headerSigninBtn) headerSigninBtn.style.display = 'none';
 
-    // Compute initials from name
-    const initials = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'US';
+    // Compute initials from username or name
+    const nameToUse = currentUser.username || currentUser.name || 'US';
+    const initials = nameToUse.split(/[._\s]/).map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'US';
 
-    if (nameDisplay) nameDisplay.textContent = currentUser.name;
+    if (nameDisplay) nameDisplay.textContent = nameToUse;
     if (roleDisplay) roleDisplay.textContent = currentUser.role;
     if (avatarDisplay) avatarDisplay.textContent = initials;
 
-    if (footerName) footerName.textContent = currentUser.name;
+    if (footerName) footerName.textContent = nameToUse;
     if (footerRole) footerRole.textContent = currentUser.role;
     if (footerAvatar) footerAvatar.textContent = initials;
 
     handleRoleChange(currentUser.role);
   } else {
+    document.body.classList.add('auth-page');
     if (signedInBox) signedInBox.style.display = 'none';
     if (signedOutBox) signedOutBox.style.display = 'flex';
     if (lockScreen) lockScreen.style.display = 'flex';
     if (headerProfile) headerProfile.style.display = 'none';
-    if (headerSigninBtn) headerSigninBtn.style.display = 'inline-flex';
+    if (headerSigninBtn) headerSigninBtn.style.display = 'none'; // Hide since lockscreen is shown directly
   }
 }
 
-function openSignInModal() {
-  const modal = document.getElementById('signin-modal');
-  if (modal) modal.classList.add('active');
-}
-
-function closeModal(modalId) {
-  const modal = document.getElementById(modalId);
-  if (modal) modal.classList.remove('active');
-}
-
-function handleSignInSubmit(event) {
+async function handleLoginSubmit(event) {
   event.preventDefault();
-  const usernameInput = document.getElementById('signin-username').value.trim();
-  const roleInput = document.getElementById('signin-role').value;
+  const usernameInput = document.getElementById('login-username').value.trim();
+  const passwordInput = document.getElementById('login-password').value;
+  const errorMsg = document.getElementById('login-error-msg');
+  const submitBtn = document.getElementById('btn-login-submit');
 
-  currentUser = {
-    isLoggedIn: true,
-    name: usernameInput || 'Sumit Verma',
-    email: usernameInput.includes('@') ? usernameInput : `${usernameInput.toLowerCase().replace(/\s+/g, '.')}@highrise.com`,
-    role: roleInput
-  };
+  errorMsg.style.display = 'none';
+  submitBtn.disabled = true;
+  const originalText = submitBtn.innerHTML;
+  submitBtn.textContent = 'Signing In...';
 
-  localStorage.setItem('highrise_bg_user', JSON.stringify(currentUser));
-  updateAuthUI();
-  closeModal('signin-modal');
+  try {
+    const res = await fetch(`${API_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ username: usernameInput, password: passwordInput })
+    });
 
-  // Trigger view reload
-  const activeSection = document.querySelector('.view-section.active');
-  if (activeSection) {
-    const viewId = activeSection.id.replace('view-', '');
-    switchView(viewId);
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      currentUser = data.user;
+      localStorage.setItem('highrise_bg_user', JSON.stringify(currentUser));
+      
+      // Clear fields
+      document.getElementById('login-username').value = '';
+      document.getElementById('login-password').value = '';
+      
+      updateAuthUI();
+      switchView('dashboard');
+    } else {
+      errorMsg.textContent = data.error || 'Invalid Username/Email or Password.';
+      errorMsg.style.display = 'block';
+    }
+  } catch (error) {
+    console.error('Login request failed:', error);
+    errorMsg.textContent = 'Connection error. Please try again.';
+    errorMsg.style.display = 'block';
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalText;
   }
 }
 
 function handleSignOut() {
-  if (confirm('Are you sure you want to sign out of Highrise BG Module?')) {
-    currentUser.isLoggedIn = false;
-    localStorage.setItem('highrise_bg_user', JSON.stringify(currentUser));
-    updateAuthUI();
-  }
+  currentUser = { isLoggedIn: false };
+  localStorage.removeItem('highrise_bg_user');
+  updateAuthUI();
 }
 
 // Initializer
@@ -632,7 +643,7 @@ async function submitBgRequest(event) {
     duration: document.getElementById('req-duration').value,
     approvalsNeeded: document.getElementById('req-approvals-needed').value,
     remarks: document.getElementById('req-remarks').value,
-    requestedBy: `${userRoleDisplay.textContent} (Sumit Verma)`,
+    requestedBy: currentUser.username || currentUser.name || 'System',
     attachments: pendingFiles // holds base64 payloads + category metadata
   };
 
@@ -734,7 +745,7 @@ async function updateRequestStatus(id, newStatus) {
   const payload = {
     id: id,
     status: newStatus,
-    approvedBy: `${currentRole} (Sumit Verma)`
+    approvedBy: currentUser.username || currentUser.name || 'System'
   };
 
   const res = await fetchApi('/api/requests', {
@@ -817,6 +828,8 @@ async function loadRegister() {
 
     tr.style.cursor = 'pointer';
     tr.onclick = () => openDetailModal('bg', bg.id);
+    tr.setAttribute('data-amount', bg.bgAmount || 0);
+    tr.setAttribute('data-margin', bg.marginMoney || 0);
     tr.setAttribute('data-search', [
       bg.id, bg.bgNumber, bg.bgType, bg.beneficiary, bg.issuingBank, bg.siteName, effectiveStatus
     ].join(' ').toLowerCase());
@@ -834,15 +847,33 @@ async function loadRegister() {
     `;
     tbody.appendChild(tr);
   });
+
+  // Render initial sums
+  filterRegisterTable('');
 }
 
-// Filter BG Register table by search text
+// Filter BG Register table by search text and recalculate totals
 function filterRegisterTable(query) {
   const rows = document.querySelectorAll('#register-tbody tr[data-search]');
   const q = query.toLowerCase().trim();
+  
+  let totalBgAmount = 0;
+  let totalMarginMoney = 0;
+
   rows.forEach(row => {
-    row.style.display = (!q || row.getAttribute('data-search').includes(q)) ? '' : 'none';
+    const isVisible = (!q || row.getAttribute('data-search').includes(q));
+    row.style.display = isVisible ? '' : 'none';
+    
+    if (isVisible) {
+      totalBgAmount += parseFloat(row.getAttribute('data-amount') || 0);
+      totalMarginMoney += parseFloat(row.getAttribute('data-margin') || 0);
+    }
   });
+
+  const amountDisplay = document.getElementById('register-total-bg-amount');
+  const marginDisplay = document.getElementById('register-total-margin-money');
+  if (amountDisplay) amountDisplay.textContent = formatCurrency(totalBgAmount);
+  if (marginDisplay) marginDisplay.textContent = formatCurrency(totalMarginMoney);
 }
 
 // Export BG Register to CSV
@@ -902,7 +933,49 @@ function exportRegisterCsv() {
 async function loadReports() {
   const register = await fetchApi('/api/register');
   allRegister = register;
+  
+  // Populate the issuing bank dropdown dynamically
+  populateBankFilterDropdown(register);
+  
   applyFilters();
+}
+
+function populateBankFilterDropdown(register) {
+  const select = document.getElementById('filter-bank');
+  if (!select) return;
+  
+  // Save current selected value
+  const currentValue = select.value;
+  
+  // Seed default bank options
+  const defaultBanks = [
+    'HDFC Bank',
+    'ICICI Bank',
+    'Axis Bank',
+    'Kotak Mahindra Bank'
+  ];
+  
+  // Extract any additional unique bank names present in the active data
+  const dataBanks = register.map(bg => String(bg.issuingBank || '').trim()).filter(Boolean);
+  
+  // Combine both default list and custom data entries, keeping them unique and sorted
+  const allBanks = [...new Set([...defaultBanks, ...dataBanks])].sort();
+  
+  // Clear and reconstruct options
+  select.innerHTML = '<option value="">All Banks</option>';
+  allBanks.forEach(bank => {
+    const opt = document.createElement('option');
+    opt.value = bank;
+    opt.textContent = bank;
+    select.appendChild(opt);
+  });
+  
+  // Restore value if it still exists in the list
+  if (allBanks.includes(currentValue)) {
+    select.value = currentValue;
+  } else {
+    select.value = '';
+  }
 }
 
 function applyFilters() {
@@ -1348,7 +1421,7 @@ async function submitRegisterForm() {
     autoRenewal: document.getElementById('bg-form-auto-renewal').checked,
     releasedDate: document.getElementById('bg-form-released-date').value,
     remarks: document.getElementById('bg-form-remarks').value,
-    lastUpdatedBy: `${currentRole} (Sumit Verma)`,
+    lastUpdatedBy: currentUser.username || currentUser.name || 'System',
     amendments: activeAmendments, // send complete history including newly applied amendments
     newAttachments: pendingFiles // base64 attachments if any
   };
@@ -1790,7 +1863,7 @@ async function submitBgRenewalRequest(event) {
     duration: duration,
     approvalsNeeded: 'Finance Manager', // renewals require Finance Manager approval
     remarks: `RENEWAL REQUEST for BG ${bg.bgNumber} (${bg.id}). Reason: ${remarks}`,
-    requestedBy: `${currentRole} (Sumit Verma)`,
+    requestedBy: currentUser.username || currentUser.name || 'System',
     attachments: pendingFiles
   };
 

@@ -219,6 +219,8 @@ body {
 /* Header */
 .main-header {
   height: 80px;
+  min-height: 80px;
+  flex-shrink: 0;
   background-color: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
   display: flex;
@@ -1135,5 +1137,23 @@ table.style-compact td {
   font-size: 14px;
   color: var(--text-secondary);
   line-height: 1.5;
+}
+
+/* Full-screen dedicated login page styles */
+body.auth-page .logged-out-lockscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  z-index: 9999;
+  backdrop-filter: none;
+}
+
+body.auth-page .lockscreen-card {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: #ffffff;
 }
 
