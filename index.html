@@ -1,68 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+  <base href="/Bank_Guarantee_Module/">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bank Guarantee (BG) Module - Nyati Group</title>
-  <meta name="description" content="Centralized Bank Guarantee tracking and management module for Highrise ERP. Track requests, approvals, expiry alerts, margin money, and renewals.">
+  <meta name="description"
+    content="Centralized Bank Guarantee tracking and management module for Highrise ERP. Track requests, a">
   <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
   <!-- Sidebar Navigation -->
   <aside class="sidebar" id="app-sidebar">
     <div class="sidebar-header">
-      <img src="https://indextap.s3.ap-south-1.amazonaws.com/images/new-launch-complex/63ef1d75d20e21fbb78ad427/3e143974-38bd-4080-8433-bdada224bdb1_Nyati.png" alt="Nyati Logo" class="brand-logo-img">
+      <img
+        src="https://indextap.s3.ap-south-1.amazonaws.com/images/new-launch-complex/63ef1d75d20e21fbb78ad427/3e143974-38bd-4080-8433-bdada224bdb1_Nyati.png"
+        alt="Nyati Logo" class="brand-logo-img">
       <div class="brand-title-box">
         <span class="brand-main-title">Nyati</span>
         <span class="brand-sub-title">Bank Guarantee Module</span>
       </div>
     </div>
-    
+
     <ul class="sidebar-menu">
       <li>
         <a class="menu-item active" id="nav-dashboard" onclick="switchView('dashboard')">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
           </svg>
           Dashboard Overview
         </a>
       </li>
       <li>
         <a class="menu-item" id="nav-raise-request" onclick="switchView('raise-request')">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
           </svg>
           Raise BG Request
         </a>
       </li>
       <li>
         <a class="menu-item" id="nav-requests-tracker" onclick="switchView('requests-tracker')">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.03 0 1.9.693 2.166 1.638m-7.377 12.408.09-.53m.06 0a3 3 0 0 1 5.856 0m-5.856 0a3 3 0 1 1 5.856 0m-6.59 3.498a5.96 5.96 0 0 0 7.324 0m-7.324 0a6.22 6.22 0 0 1-1.28-3.2l-.089-.53m8.604 3.73a6.22 6.22 0 0 0 1.28-3.2l.089-.53m0 0a5.96 5.96 0 0 0-7.323 0" />
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.03 0 1.9.693 2.166 1.638m-7.377 12.408.09-.53m.06 0a3 3 0 0 1 5.856 0m-5.856 0a3 3 0 1 1 5.856 0m-6.59 3.498a5.96 5.96 0 0 0 7.324 0m-7.324 0a6.22 6.22 0 0 1-1.28-3.2l-.089-.53m8.604 3.73a6.22 6.22 0 0 0 1.28-3.2l.089-.53m0 0a5.96 5.96 0 0 0-7.323 0" />
           </svg>
           Requests Tracker
         </a>
       </li>
       <li>
         <a class="menu-item" id="nav-register" onclick="switchView('register')">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
           </svg>
           BG Register
         </a>
       </li>
       <li>
         <a class="menu-item" id="nav-raise-renewal" onclick="switchView('raise-renewal')">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
           </svg>
           Raise BG Renewal
         </a>
       </li>
       <li>
         <a class="menu-item" id="nav-reports" onclick="switchView('reports')">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
           </svg>
           Reports & Alerts
@@ -70,7 +87,8 @@
       </li>
       <li>
         <a class="menu-item" id="nav-cost-center-report" onclick="switchView('cost-center-report')">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z" />
             <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z" />
           </svg>
@@ -78,7 +96,7 @@
         </a>
       </li>
     </ul>
-    
+
     <div class="sidebar-footer">
       <!-- Signed-In View -->
       <div id="user-signed-in-box" class="auth-card">
@@ -89,8 +107,10 @@
           </div>
         </div>
         <button class="btn-auth btn-signout" onclick="handleSignOut()" title="Sign Out">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l3 3m0 0l-3 3m3-3H2.25" />
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l3 3m0 0l-3 3m3-3H2.25" />
           </svg>
           <span>Sign Out</span>
         </button>
@@ -103,8 +123,10 @@
           <span class="guest-sub">Access requires Sign In</span>
         </div>
         <button class="btn-auth btn-signin" onclick="openSignInModal()">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
           </svg>
           <span>Sign In</span>
         </button>
@@ -114,13 +136,13 @@
 
   <!-- Main Content Panel -->
   <main class="main-content">
-    
+
     <!-- Top Header -->
     <header class="main-header">
       <div class="header-title">
         <h1 id="view-title">Dashboard Overview</h1>
       </div>
-      
+
       <div class="header-actions">
         <div class="user-profile" id="header-user-profile">
           <div class="user-avatar" id="user-avatar-initials">SV</div>
@@ -128,9 +150,12 @@
             <span class="user-name" id="user-name-display">Sumit Verma</span>
           </div>
         </div>
-        <button class="btn btn-primary btn-sm" id="header-signin-btn" onclick="openSignInModal()" style="display: none;">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:16px; height:16px;">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+        <button class="btn btn-primary btn-sm" id="header-signin-btn" onclick="openSignInModal()"
+          style="display: none;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor" style="width:16px; height:16px;">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
           </svg>
           Sign In
         </button>
@@ -141,32 +166,45 @@
     <div id="logged-out-lockscreen" class="logged-out-lockscreen" style="display: none;">
       <div class="lockscreen-card">
         <div class="lockscreen-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
           </svg>
         </div>
         <h2 style="margin-bottom: 8px;">Authentication Required</h2>
-        <p style="margin-bottom: 20px; font-size: 13px; color: var(--text-secondary);">Please enter your User ID and Password to sign in.</p>
-        
+        <p style="margin-bottom: 20px; font-size: 13px; color: var(--text-secondary);">Please enter your User ID and
+          Password to sign in.</p>
+
         <!-- Embedded Login Form -->
         <form id="lockscreen-login-form" onsubmit="handleLoginSubmit(event)" style="width: 100%; text-align: left;">
-          <div id="login-error-msg" style="display: none; background-color: rgba(239, 68, 68, 0.1); color: var(--color-danger); border: 1px solid rgba(239, 68, 68, 0.2); padding: 10px; border-radius: var(--radius-md); font-size: 13px; margin-bottom: 16px; font-weight: 500; text-align: center;">
+          <div id="login-error-msg"
+            style="display: none; background-color: rgba(239, 68, 68, 0.1); color: var(--color-danger); border: 1px solid rgba(239, 68, 68, 0.2); padding: 10px; border-radius: var(--radius-md); font-size: 13px; margin-bottom: 16px; font-weight: 500; text-align: center;">
             Invalid Username/Email or Password.
           </div>
-          
+
           <div class="form-group" style="margin-bottom: 16px;">
-            <label for="login-username" style="font-weight: 600; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Username / Email <span style="color: var(--color-danger);">*</span></label>
-            <input type="text" id="login-username" class="form-control" placeholder="Enter username or email" required style="height: 40px;">
+            <label for="login-username"
+              style="font-weight: 600; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Username /
+              Email <span style="color: var(--color-danger);">*</span></label>
+            <input type="text" id="login-username" class="form-control" placeholder="Enter username or email" required
+              style="height: 40px;">
           </div>
-          
+
           <div class="form-group" style="margin-bottom: 24px;">
-            <label for="login-password" style="font-weight: 600; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Password <span style="color: var(--color-danger);">*</span></label>
-            <input type="password" id="login-password" class="form-control" placeholder="Enter password" required style="height: 40px;">
+            <label for="login-password"
+              style="font-weight: 600; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Password
+              <span style="color: var(--color-danger);">*</span></label>
+            <input type="password" id="login-password" class="form-control" placeholder="Enter password" required
+              style="height: 40px;">
           </div>
-          
-          <button type="submit" id="btn-login-submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 14px; font-weight: 600; justify-content: center; height: 42px;">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 18px; height: 18px; margin-right: 8px;">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+
+          <button type="submit" id="btn-login-submit" class="btn btn-primary"
+            style="width: 100%; padding: 10px; font-size: 14px; font-weight: 600; justify-content: center; height: 42px;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+              stroke="currentColor" style="width: 18px; height: 18px; margin-right: 8px;">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
             </svg>
             Sign In
           </button>
@@ -176,13 +214,13 @@
 
     <!-- Dynamic Container -->
     <div class="view-container">
-      
+
       <!-- 1. DASHBOARD VIEW -->
       <section id="view-dashboard" class="view-section active">
-        
+
         <!-- Metrics Grid -->
         <div class="metrics-grid">
-          
+
           <div class="metric-card primary" id="metric-outstanding">
             <div class="metric-info">
               <span class="metric-label">Outstanding BGs</span>
@@ -190,8 +228,10 @@
               <span class="metric-subtext">Active guarantees</span>
             </div>
             <div class="metric-icon-wrapper">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.067 4.003.812A1.97 1.97 0 0 1 14 10.25M12 6.75v-1.5m0 16.5v-1.5" />
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.067 4.003.812A1.97 1.97 0 0 1 14 10.25M12 6.75v-1.5m0 16.5v-1.5" />
               </svg>
             </div>
           </div>
@@ -203,8 +243,10 @@
               <span class="metric-subtext">Sum of active guarantees</span>
             </div>
             <div class="metric-icon-wrapper">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5m-18 14.75V5.25c0-.754.622-1.375 1.375-1.375h16.5c.753 0 1.375.621 1.375 1.375v13.5c0 .754-.622 1.375-1.375 1.375H5.25c-.753 0-1.375-.621-1.375-1.375m15.5-1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm0 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5m-18 14.75V5.25c0-.754.622-1.375 1.375-1.375h16.5c.753 0 1.375.621 1.375 1.375v13.5c0 .754-.622 1.375-1.375 1.375H5.25c-.753 0-1.375-.621-1.375-1.375m15.5-1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm0 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
               </svg>
             </div>
           </div>
@@ -216,8 +258,10 @@
               <span class="metric-subtext">Locked FDR capital</span>
             </div>
             <div class="metric-icon-wrapper">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
               </svg>
             </div>
           </div>
@@ -229,8 +273,10 @@
               <span class="metric-subtext">Expiring within 30 days</span>
             </div>
             <div class="metric-icon-wrapper">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
               </svg>
             </div>
           </div>
@@ -238,20 +284,22 @@
         </div>
 
         <div class="dashboard-details-grid">
-          
+
           <!-- Recent BGs Table Panel -->
           <div class="card-panel">
             <div class="panel-header">
               <h2>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                 </svg>
                 Recently Managed Bank Guarantees
               </h2>
               <button class="btn btn-secondary btn-sm" onclick="switchView('register')">View Register</button>
             </div>
-            
+
             <div class="table-wrapper">
               <table id="dashboard-recent-table">
                 <thead>
@@ -267,7 +315,9 @@
                 </thead>
                 <tbody id="dashboard-recent-tbody">
                   <!-- Dynamic content -->
-                  <tr><td colspan="7" style="text-align: center;">Loading recent guarantees...</td></tr>
+                  <tr>
+                    <td colspan="7" style="text-align: center;">Loading recent guarantees...</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -277,8 +327,10 @@
           <div class="card-panel">
             <div class="panel-header">
               <h2>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
                 </svg>
                 Renewal Notifications
               </h2>
@@ -295,35 +347,43 @@
 
       <!-- 2. RAISE REQUEST VIEW -->
       <section id="view-raise-request" class="view-section">
-        
+
         <div class="banner-alert info" id="role-warning-request" style="display: none;">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor" style="width: 20px; height: 20px;">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
           </svg>
-          <span>Only the Tender team or Contracts admins are expected to submit new requests, but you can raise one here as well.</span>
+          <span>Only the Tender team or Contracts admins are expected to submit new requests, but you can raise one here
+            as well.</span>
         </div>
 
         <div class="card-panel">
           <div class="panel-header">
             <h2>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
               </svg>
               Raise Bank Guarantee (BG) Request Form
             </h2>
           </div>
-          
+
           <form id="raise-bg-request-form" onsubmit="submitBgRequest(event)">
             <div class="form-grid">
-              
+
               <div class="form-group">
-                <label for="req-project-ref">Project / Contract Ref <span style="color: var(--color-danger);">*</span></label>
-                <input type="text" id="req-project-ref" class="form-control" placeholder="e.g. Metro Line Project A" required>
+                <label for="req-project-ref">Project / Contract Ref <span
+                    style="color: var(--color-danger);">*</span></label>
+                <input type="text" id="req-project-ref" class="form-control" placeholder="e.g. Metro Line Project A"
+                  required>
               </div>
 
               <div class="form-group">
                 <label for="req-bg-type">BG Type Required <span style="color: var(--color-danger);">*</span></label>
-                <select id="req-bg-type" class="form-control" required onchange="toggleCostCenterField('req-cost-center-select', 'req-cost-center-input', this.value)">
+                <select id="req-bg-type" class="form-control" required
+                  onchange="toggleCostCenterField('req-cost-center-select', 'req-cost-center-input', this.value)">
                   <option value="EMD">EMD (Earnest Money Deposit)</option>
                   <option value="Performance">Performance BG</option>
                   <option value="Mobilisation Advance">Mobilisation Advance BG</option>
@@ -337,51 +397,64 @@
                 <select id="req-cost-center-select" class="form-control" style="display: none;">
                   <!-- Dynamically populated via JS -->
                 </select>
-                <input type="text" id="req-cost-center-input" class="form-control" placeholder="e.g. Pune Project Office">
+                <input type="text" id="req-cost-center-input" class="form-control"
+                  placeholder="e.g. Pune Project Office">
               </div>
 
               <div class="form-group">
                 <label for="req-amount">Amount Required (₹) <span style="color: var(--color-danger);">*</span></label>
-                <input type="number" id="req-amount" class="form-control" placeholder="e.g. 500000" min="1" step="any" required>
+                <input type="number" id="req-amount" class="form-control" placeholder="e.g. 500000" min="1" step="any"
+                  required>
               </div>
 
               <div class="form-group">
-                <label for="req-due-date">Due Date for Submission <span style="color: var(--color-danger);">*</span></label>
+                <label for="req-due-date">Due Date for Submission <span
+                    style="color: var(--color-danger);">*</span></label>
                 <input type="date" id="req-due-date" class="form-control" required>
               </div>
 
               <div class="form-group">
-                <label for="req-beneficiary-name">Name of Beneficiary <span style="color: var(--color-danger);">*</span></label>
-                <input type="text" id="req-beneficiary-name" class="form-control" placeholder="e.g. National Highway Authority" required>
+                <label for="req-beneficiary-name">Name of Beneficiary <span
+                    style="color: var(--color-danger);">*</span></label>
+                <input type="text" id="req-beneficiary-name" class="form-control"
+                  placeholder="e.g. National Highway Authority" required>
               </div>
 
               <div class="form-group">
                 <label for="req-beneficiary-address">Address of Beneficiary</label>
-                <input type="text" id="req-beneficiary-address" class="form-control" placeholder="Beneficiary official address">
+                <input type="text" id="req-beneficiary-address" class="form-control"
+                  placeholder="Beneficiary official address">
               </div>
 
               <div class="form-group">
-                <label for="req-beneficiary-bank-name">Beneficiary Bank Name <span style="color: var(--color-danger);">*</span></label>
-                <input type="text" id="req-beneficiary-bank-name" class="form-control" placeholder="e.g. HDFC Bank" required>
+                <label for="req-beneficiary-bank-name">Beneficiary Bank Name <span
+                    style="color: var(--color-danger);">*</span></label>
+                <input type="text" id="req-beneficiary-bank-name" class="form-control" placeholder="e.g. HDFC Bank"
+                  required>
               </div>
 
               <div class="form-group">
                 <label for="req-beneficiary-bank-account">Beneficiary Account Number</label>
-                <input type="text" id="req-beneficiary-bank-account" class="form-control" placeholder="e.g. 50100234591">
+                <input type="text" id="req-beneficiary-bank-account" class="form-control"
+                  placeholder="e.g. 50100234591">
               </div>
 
               <div class="form-group">
-                <label for="req-beneficiary-bank-ifsc">Beneficiary Bank IFSC <span style="color: var(--color-danger);">*</span></label>
-                <input type="text" id="req-beneficiary-bank-ifsc" class="form-control" placeholder="e.g. HDFC0000060" required>
+                <label for="req-beneficiary-bank-ifsc">Beneficiary Bank IFSC <span
+                    style="color: var(--color-danger);">*</span></label>
+                <input type="text" id="req-beneficiary-bank-ifsc" class="form-control" placeholder="e.g. HDFC0000060"
+                  required>
               </div>
 
               <div class="form-group">
                 <label for="req-duration">Duration of BG <span style="color: var(--color-danger);">*</span></label>
-                <input type="text" id="req-duration" class="form-control" placeholder="e.g. 18 Months + 3 Months Claim" required>
+                <input type="text" id="req-duration" class="form-control" placeholder="e.g. 18 Months + 3 Months Claim"
+                  required>
               </div>
 
               <div class="form-group">
-                <label for="req-approvals-needed">Approvals Needed Workflow <span style="color: var(--color-danger);">*</span></label>
+                <label for="req-approvals-needed">Approvals Needed Workflow <span
+                    style="color: var(--color-danger);">*</span></label>
                 <select id="req-approvals-needed" class="form-control" required>
                   <option value="Finance Manager">Finance Manager Approval</option>
                   <option value="Management Board">Management Board Approval</option>
@@ -390,7 +463,8 @@
 
               <div class="form-group full-width">
                 <label for="req-remarks">Special Conditions / Remarks</label>
-                <textarea id="req-remarks" class="form-control" rows="3" placeholder="Enter special remarks or notes here..."></textarea>
+                <textarea id="req-remarks" class="form-control" rows="3"
+                  placeholder="Enter special remarks or notes here..."></textarea>
               </div>
 
               <!-- Attachments upload -->
@@ -400,32 +474,38 @@
                   <!-- 1. BG Draft -->
                   <div class="compact-upload-box">
                     <span class="upload-label">BG Draft <span style="color: var(--color-danger);">*</span></span>
-                    <input type="file" id="req-file-bg-draft" class="file-input-compact" onchange="handleCategoryFileSelect(event, 'BG Draft', 'req-list-bg-draft')">
+                    <input type="file" id="req-file-bg-draft" class="file-input-compact"
+                      onchange="handleCategoryFileSelect(event, 'BG Draft', 'req-list-bg-draft')">
                     <div class="file-list-compact" id="req-list-bg-draft"></div>
                   </div>
                   <!-- 2. LOI Copy / Tender Document -->
                   <div class="compact-upload-box">
-                    <span class="upload-label">LOI Copy / Tender Document <span style="color: var(--color-danger);">*</span></span>
-                    <input type="file" id="req-file-loi" class="file-input-compact" onchange="handleCategoryFileSelect(event, 'LOI Copy / Tender Document', 'req-list-loi')">
+                    <span class="upload-label">LOI Copy / Tender Document <span
+                        style="color: var(--color-danger);">*</span></span>
+                    <input type="file" id="req-file-loi" class="file-input-compact"
+                      onchange="handleCategoryFileSelect(event, 'LOI Copy / Tender Document', 'req-list-loi')">
                     <div class="file-list-compact" id="req-list-loi"></div>
                   </div>
                   <!-- 3. Tender Checklist -->
                   <div class="compact-upload-box">
-                    <span class="upload-label">Tender Checklist <span style="color: var(--color-danger);">*</span></span>
-                    <input type="file" id="req-file-checklist" class="file-input-compact" onchange="handleCategoryFileSelect(event, 'Tender Checklist', 'req-list-checklist')">
+                    <span class="upload-label">Tender Checklist <span
+                        style="color: var(--color-danger);">*</span></span>
+                    <input type="file" id="req-file-checklist" class="file-input-compact"
+                      onchange="handleCategoryFileSelect(event, 'Tender Checklist', 'req-list-checklist')">
                     <div class="file-list-compact" id="req-list-checklist"></div>
                   </div>
                   <!-- 4. Others -->
                   <div class="compact-upload-box">
                     <span class="upload-label">Others</span>
-                    <input type="file" id="req-file-others" class="file-input-compact" onchange="handleCategoryFileSelect(event, 'Others', 'req-list-others')">
+                    <input type="file" id="req-file-others" class="file-input-compact"
+                      onchange="handleCategoryFileSelect(event, 'Others', 'req-list-others')">
                     <div class="file-list-compact" id="req-list-others"></div>
                   </div>
                 </div>
               </div>
 
             </div>
-            
+
             <div style="margin-top: 30px; display: flex; justify-content: flex-end; gap: 12px;">
               <button type="button" class="btn btn-secondary" onclick="switchView('dashboard')">Cancel</button>
               <button type="submit" class="btn btn-primary" id="btn-submit-request">Submit BG Request</button>
@@ -437,12 +517,14 @@
 
       <!-- 3. REQUESTS TRACKER VIEW -->
       <section id="view-requests-tracker" class="view-section">
-        
+
         <div class="card-panel">
           <div class="panel-header">
             <h2>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.03 0 1.9.693 2.166 1.638m-7.377 12.408.09-.53m.06 0a3 3 0 0 1 5.856 0m-5.856 0a3 3 0 1 1 5.856 0" />
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.03 0 1.9.693 2.166 1.638m-7.377 12.408.09-.53m.06 0a3 3 0 0 1 5.856 0m-5.856 0a3 3 0 1 1 5.856 0" />
               </svg>
               BG Request Workflow Pipeline
             </h2>
@@ -465,7 +547,9 @@
                 </tr>
               </thead>
               <tbody id="requests-tracker-tbody">
-                <tr><td colspan="10" style="text-align: center;">Loading requests...</td></tr>
+                <tr>
+                  <td colspan="10" style="text-align: center;">Loading requests...</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -475,84 +559,107 @@
 
       <!-- 4. BG REGISTER VIEW -->
       <section id="view-register" class="view-section">
-        
+
         <div class="card-panel">
           <div class="panel-header" style="flex-wrap: wrap; gap: 10px;">
             <h2>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
               </svg>
               Centralized Bank Guarantee Register
             </h2>
             <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-              <input type="text" id="register-search" class="filter-control" placeholder="🔍  Search BG No, Beneficiary..." oninput="filterRegisterTable(this.value)" style="min-width:230px; height:35px;">
-              <button class="btn btn-success btn-sm" onclick="exportRegisterCsv()" style="height:35px; padding: 0 14px;">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:15px; height:15px;">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              <input type="text" id="register-search" class="filter-control"
+                placeholder="🔍  Search BG No, Beneficiary..." oninput="filterRegisterTable(this.value)"
+                style="min-width:230px; height:35px;">
+              <button class="btn btn-success btn-sm" onclick="exportRegisterCsv()"
+                style="height:35px; padding: 0 14px;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                  stroke="currentColor" style="width:15px; height:15px;">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
                 </svg>
                 Export CSV
               </button>
-              <button class="btn btn-primary" id="btn-register-new-bg" onclick="openRegisterModal(null)" style="display: none; height:35px;">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 18px; height: 18px;">
+              <button class="btn btn-primary" id="btn-register-new-bg" onclick="openRegisterModal(null)"
+                style="display: none; height:35px;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                  stroke="currentColor" style="width: 18px; height: 18px;">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
                 Register Manual BG
               </button>
-          </div>
+            </div>
 
-          <!-- Summary Totals Row at the Top -->
-          <div class="register-summary-row" style="display: flex; gap: 20px; margin-bottom: 24px; background-color: var(--bg-primary); padding: 16px 24px; border-radius: var(--radius-lg); border: 1px solid var(--border-color); flex-wrap: wrap;">
-            <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px;">
-              <div style="width: 42px; height: 42px; border-radius: 50%; background-color: var(--color-primary-light); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold;">₹</div>
-              <div>
-                <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Total BG Amount</div>
-                <div id="register-total-bg-amount" style="font-size: 20px; font-weight: 800; color: var(--text-primary); margin-top: 2px;">₹0.00</div>
+            <!-- Summary Totals Row at the Top -->
+            <div class="register-summary-row"
+              style="display: flex; gap: 20px; margin-bottom: 24px; background-color: var(--bg-primary); padding: 16px 24px; border-radius: var(--radius-lg); border: 1px solid var(--border-color); flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px;">
+                <div
+                  style="width: 42px; height: 42px; border-radius: 50%; background-color: var(--color-primary-light); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold;">
+                  ₹</div>
+                <div>
+                  <div
+                    style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
+                    Total BG Amount</div>
+                  <div id="register-total-bg-amount"
+                    style="font-size: 20px; font-weight: 800; color: var(--text-primary); margin-top: 2px;">₹0.00</div>
+                </div>
+              </div>
+              <div style="width: 1px; background-color: var(--border-color); align-self: stretch;"></div>
+              <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px;">
+                <div
+                  style="width: 42px; height: 42px; border-radius: 50%; background-color: var(--color-info-light); color: var(--color-info); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold;">
+                  ₹</div>
+                <div>
+                  <div
+                    style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
+                    Total Margin Money Blocked</div>
+                  <div id="register-total-margin-money"
+                    style="font-size: 20px; font-weight: 800; color: var(--text-primary); margin-top: 2px;">₹0.00</div>
+                </div>
               </div>
             </div>
-            <div style="width: 1px; background-color: var(--border-color); align-self: stretch;"></div>
-            <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px;">
-              <div style="width: 42px; height: 42px; border-radius: 50%; background-color: var(--color-info-light); color: var(--color-info); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold;">₹</div>
-              <div>
-                <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Total Margin Money Blocked</div>
-                <div id="register-total-margin-money" style="font-size: 20px; font-weight: 800; color: var(--text-primary); margin-top: 2px;">₹0.00</div>
-              </div>
+
+            <div class="table-wrapper">
+              <table id="register-table">
+                <thead>
+                  <tr>
+                    <th>BG Ref ID</th>
+                    <th>BG Number</th>
+                    <th>Type</th>
+                    <th>Beneficiary</th>
+                    <th>Issuing Bank</th>
+                    <th>Amount</th>
+                    <th>Expiry Date</th>
+                    <th>FDR / Margin Details</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="register-tbody">
+                  <tr>
+                    <td colspan="10" style="text-align: center;">Loading registered guarantees...</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
-
-          <div class="table-wrapper">
-            <table id="register-table">
-              <thead>
-                <tr>
-                  <th>BG Ref ID</th>
-                  <th>BG Number</th>
-                  <th>Type</th>
-                  <th>Beneficiary</th>
-                  <th>Issuing Bank</th>
-                  <th>Amount</th>
-                  <th>Expiry Date</th>
-                  <th>FDR / Margin Details</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="register-tbody">
-                <tr><td colspan="10" style="text-align: center;">Loading registered guarantees...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
 
       </section>
 
       <!-- 5. REPORTS & ALERTS VIEW -->
       <section id="view-reports" class="view-section">
-        
+
         <!-- Filters Panel -->
         <div class="filters-panel" id="reports-filters-panel">
-          
+
           <div class="filter-item">
             <label for="filter-search">Search Text</label>
-            <input type="text" id="filter-search" class="filter-control" placeholder="BG No, Beneficiary, ID..." oninput="applyFilters()">
+            <input type="text" id="filter-search" class="filter-control" placeholder="BG No, Beneficiary, ID..."
+              oninput="applyFilters()">
           </div>
 
           <div class="filter-item">
@@ -596,13 +703,17 @@
           </div>
 
           <div class="filter-item" style="flex: 0; min-width: 100px;">
-            <button class="btn btn-secondary" onclick="resetFilters()" style="width: 100%; height: 35px; padding: 0 10px;">Reset</button>
+            <button class="btn btn-secondary" onclick="resetFilters()"
+              style="width: 100%; height: 35px; padding: 0 10px;">Reset</button>
           </div>
 
           <div class="filter-item" style="flex: 0; min-width: 150px;">
-            <button class="btn btn-success" onclick="exportToCsvSimulation()" style="width: 100%; height: 35px; padding: 0 10px;">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px;">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            <button class="btn btn-success" onclick="exportToCsvSimulation()"
+              style="width: 100%; height: 35px; padding: 0 10px;">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" style="width: 16px; height: 16px;">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
               </svg>
               Export Report
             </button>
@@ -614,12 +725,15 @@
         <div class="card-panel">
           <div class="panel-header">
             <h2>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
               </svg>
               Filtered Bank Guarantee Report
             </h2>
-            <div id="report-summary-counts" style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">Total BGs Found: 0</div>
+            <div id="report-summary-counts" style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">
+              Total BGs Found: 0</div>
           </div>
 
           <div class="table-wrapper">
@@ -642,7 +756,9 @@
                 </tr>
               </thead>
               <tbody id="report-tbody">
-                <tr><td colspan="13" style="text-align: center;">No records found matching filters.</td></tr>
+                <tr>
+                  <td colspan="13" style="text-align: center;">No records found matching filters.</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -652,22 +768,25 @@
 
       <!-- 6. RAISE BG RENEWAL VIEW -->
       <section id="view-raise-renewal" class="view-section">
-        
+
         <div class="card-panel">
           <div class="panel-header">
             <h2>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
               </svg>
               Raise Bank Guarantee (BG) Renewal Request Form
             </h2>
           </div>
-          
+
           <form id="raise-bg-renewal-form" onsubmit="submitBgRenewalRequest(event)">
             <div class="form-grid">
-              
+
               <div class="form-group">
-                <label for="ren-bg-select">Select BG Number to Renew <span style="color: var(--color-danger);">*</span></label>
+                <label for="ren-bg-select">Select BG Number to Renew <span
+                    style="color: var(--color-danger);">*</span></label>
                 <select id="ren-bg-select" class="form-control" required onchange="handleRenewalBgSelect(this.value)">
                   <!-- Populated dynamically with active/expired BGs -->
                 </select>
@@ -676,27 +795,32 @@
               <!-- Read-only auto-fetched details -->
               <div class="form-group">
                 <label>Current Expiry Date</label>
-                <input type="text" id="ren-lbl-current-expiry" class="form-control" readonly style="background-color: var(--border-color); font-weight: 600;">
+                <input type="text" id="ren-lbl-current-expiry" class="form-control" readonly
+                  style="background-color: var(--border-color); font-weight: 600;">
               </div>
 
               <div class="form-group">
                 <label>Current BG Amount</label>
-                <input type="text" id="ren-lbl-current-amount" class="form-control" readonly style="background-color: var(--border-color); font-weight: 600;">
+                <input type="text" id="ren-lbl-current-amount" class="form-control" readonly
+                  style="background-color: var(--border-color); font-weight: 600;">
               </div>
 
               <div class="form-group">
                 <label>Beneficiary</label>
-                <input type="text" id="ren-lbl-beneficiary" class="form-control" readonly style="background-color: var(--border-color);">
+                <input type="text" id="ren-lbl-beneficiary" class="form-control" readonly
+                  style="background-color: var(--border-color);">
               </div>
 
               <div class="form-group">
                 <label>Project / Site Reference</label>
-                <input type="text" id="ren-lbl-project-ref" class="form-control" readonly style="background-color: var(--border-color);">
+                <input type="text" id="ren-lbl-project-ref" class="form-control" readonly
+                  style="background-color: var(--border-color);">
               </div>
 
               <div class="form-group">
                 <label>Issuing Bank</label>
-                <input type="text" id="ren-lbl-issuing-bank" class="form-control" readonly style="background-color: var(--border-color);">
+                <input type="text" id="ren-lbl-issuing-bank" class="form-control" readonly
+                  style="background-color: var(--border-color);">
               </div>
 
               <!-- Inputs for renewal -->
@@ -707,12 +831,14 @@
 
               <div class="form-group">
                 <label for="ren-duration">Revised BG Duration <span style="color: var(--color-danger);">*</span></label>
-                <input type="text" id="ren-duration" class="form-control" placeholder="e.g. Extended by 12 Months" required>
+                <input type="text" id="ren-duration" class="form-control" placeholder="e.g. Extended by 12 Months"
+                  required>
               </div>
 
               <div class="form-group full-width">
                 <label for="ren-remarks">Renewal Remarks / Justification</label>
-                <textarea id="ren-remarks" class="form-control" rows="3" placeholder="Enter remarks or justification for the renewal..."></textarea>
+                <textarea id="ren-remarks" class="form-control" rows="3"
+                  placeholder="Enter remarks or justification for the renewal..."></textarea>
               </div>
 
               <!-- Attachments upload categorized -->
@@ -720,25 +846,29 @@
                 <label style="font-weight: 700; margin-bottom: 8px;">Upload Renewal Attachments</label>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
                   <div class="compact-upload-box">
-                    <span class="upload-label">LOI / Extension Order <span style="color: var(--color-danger);">*</span></span>
-                    <input type="file" id="ren-file-loi" class="file-input-compact" onchange="handleCategoryFileSelect(event, 'LOI Copy / Tender Document', 'ren-list-loi')">
+                    <span class="upload-label">LOI / Extension Order <span
+                        style="color: var(--color-danger);">*</span></span>
+                    <input type="file" id="ren-file-loi" class="file-input-compact"
+                      onchange="handleCategoryFileSelect(event, 'LOI Copy / Tender Document', 'ren-list-loi')">
                     <div class="file-list-compact" id="ren-list-loi"></div>
                   </div>
                   <div class="compact-upload-box">
                     <span class="upload-label">BG Draft (Renewed)</span>
-                    <input type="file" id="ren-file-bg-draft" class="file-input-compact" onchange="handleCategoryFileSelect(event, 'BG Draft', 'ren-list-bg-draft')">
+                    <input type="file" id="ren-file-bg-draft" class="file-input-compact"
+                      onchange="handleCategoryFileSelect(event, 'BG Draft', 'ren-list-bg-draft')">
                     <div class="file-list-compact" id="ren-list-bg-draft"></div>
                   </div>
                   <div class="compact-upload-box">
                     <span class="upload-label">Others</span>
-                    <input type="file" id="ren-file-others" class="file-input-compact" onchange="handleCategoryFileSelect(event, 'Others', 'ren-list-others')">
+                    <input type="file" id="ren-file-others" class="file-input-compact"
+                      onchange="handleCategoryFileSelect(event, 'Others', 'ren-list-others')">
                     <div class="file-list-compact" id="ren-list-others"></div>
                   </div>
                 </div>
               </div>
 
             </div>
-            
+
             <div style="margin-top: 30px; display: flex; justify-content: flex-end; gap: 12px;">
               <button type="button" class="btn btn-secondary" onclick="switchView('dashboard')">Cancel</button>
               <button type="submit" class="btn btn-primary">Submit Renewal Request</button>
@@ -750,7 +880,7 @@
 
       <!-- 7. COST CENTRE REPORT VIEW -->
       <section id="view-cost-center-report" class="view-section">
-        
+
         <!-- Filters Panel -->
         <div class="filters-panel" style="margin-bottom: 24px;">
           <div class="filter-item">
@@ -760,9 +890,12 @@
             </select>
           </div>
           <div class="filter-item" style="flex: 0; min-width: 150px;">
-            <button class="btn btn-success" onclick="exportCostCenterCsv()" style="width: 100%; height: 35px; padding: 0 10px;">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px;">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            <button class="btn btn-success" onclick="exportCostCenterCsv()"
+              style="width: 100%; height: 35px; padding: 0 10px;">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" style="width: 16px; height: 16px;">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
               </svg>
               Export Report
             </button>
@@ -798,8 +931,10 @@
         <div class="card-panel">
           <div class="panel-header">
             <h2>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
               </svg>
               Cost Center Wise Bank Guarantees
             </h2>
@@ -820,7 +955,10 @@
                 </tr>
               </thead>
               <tbody id="cc-report-tbody">
-                <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Please select a Cost Center above.</td></tr>
+                <tr>
+                  <td colspan="8" style="text-align: center; color: var(--text-muted);">Please select a Cost Center
+                    above.</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -841,22 +979,24 @@
         <h3 id="modal-title-action">Register Bank Guarantee</h3>
         <button class="modal-close" onclick="closeModal('register-bg-modal')">&times;</button>
       </div>
-      
+
       <div class="modal-body">
         <form id="register-bg-form">
           <input type="hidden" id="bg-form-id">
           <input type="hidden" id="bg-form-request-id">
-          
+
           <div class="form-grid">
-            
+
             <div class="form-group">
-              <label for="bg-form-number">Issuing Bank BG Number <span style="color: var(--color-danger);">*</span></label>
+              <label for="bg-form-number">Issuing Bank BG Number <span
+                  style="color: var(--color-danger);">*</span></label>
               <input type="text" id="bg-form-number" class="form-control" placeholder="e.g. BG12903829038" required>
             </div>
 
             <div class="form-group">
               <label for="bg-form-type">BG Type <span style="color: var(--color-danger);">*</span></label>
-              <select id="bg-form-type" class="form-control" required onchange="toggleCostCenterField('bg-form-cost-center-select', 'bg-form-cost-center-input', this.value)">
+              <select id="bg-form-type" class="form-control" required
+                onchange="toggleCostCenterField('bg-form-cost-center-select', 'bg-form-cost-center-input', this.value)">
                 <option value="EMD">EMD</option>
                 <option value="Performance">Performance BG</option>
                 <option value="Mobilisation Advance">Mobilisation Advance BG</option>
@@ -872,7 +1012,8 @@
 
             <div class="form-group">
               <label for="bg-form-client-name">Client Name / Beneficiary Name</label>
-              <input type="text" id="bg-form-client-name" class="form-control" placeholder="Who the BG is issued in favor of">
+              <input type="text" id="bg-form-client-name" class="form-control"
+                placeholder="Who the BG is issued in favor of">
             </div>
 
             <div class="form-group">
@@ -902,7 +1043,8 @@
 
             <div class="form-group">
               <label for="bg-form-expiry-date">Expiry Date <span style="color: var(--color-danger);">*</span></label>
-              <input type="date" id="bg-form-expiry-date" class="form-control" required onchange="handleExpiryDateChange(this.value)">
+              <input type="date" id="bg-form-expiry-date" class="form-control" required
+                onchange="handleExpiryDateChange(this.value)">
             </div>
 
             <div class="form-group">
@@ -922,7 +1064,8 @@
 
             <div class="form-group">
               <label for="bg-form-margin-money">Margin Money Blocked (₹)</label>
-              <input type="number" id="bg-form-margin-money" class="form-control" min="0" step="any" placeholder="Amount blocked by bank">
+              <input type="number" id="bg-form-margin-money" class="form-control" min="0" step="any"
+                placeholder="Amount blocked by bank">
             </div>
 
             <div class="form-group">
@@ -931,11 +1074,13 @@
             </div>
 
             <div class="form-group" id="bg-form-cost-center-group">
-              <label id="bg-form-cost-center-label">Cost Center <span style="color: var(--color-danger);">*</span></label>
+              <label id="bg-form-cost-center-label">Cost Center <span
+                  style="color: var(--color-danger);">*</span></label>
               <select id="bg-form-cost-center-select" class="form-control" style="display: none;">
                 <!-- Dynamically populated via JS -->
               </select>
-              <input type="text" id="bg-form-cost-center-input" class="form-control" placeholder="Accounting Cost Center">
+              <input type="text" id="bg-form-cost-center-input" class="form-control"
+                placeholder="Accounting Cost Center">
             </div>
 
             <div class="form-group">
@@ -949,7 +1094,8 @@
             </div>
 
             <div class="form-group" id="group-released-date" style="display: none;">
-              <label for="bg-form-released-date">Released / Cancelled Date <span style="color: var(--color-danger);">*</span></label>
+              <label for="bg-form-released-date">Released / Cancelled Date <span
+                  style="color: var(--color-danger);">*</span></label>
               <input type="date" id="bg-form-released-date" class="form-control">
             </div>
 
@@ -959,14 +1105,21 @@
             </div>
 
             <!-- Auto-Calculated Alert Dates display -->
-            <div class="form-group full-width" style="background-color: var(--bg-primary); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex; flex-direction: row; gap: 24px;">
+            <div class="form-group full-width"
+              style="background-color: var(--bg-primary); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex; flex-direction: row; gap: 24px;">
               <div>
-                <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Renewal Alert Date (Auto-calc: 30d prior)</span>
-                <div style="font-weight: 600; color: var(--color-danger); font-size: 14px; margin-top: 4px;" id="lbl-auto-alert-date">Select Expiry Date</div>
+                <span
+                  style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Renewal
+                  Alert Date (Auto-calc: 30d prior)</span>
+                <div style="font-weight: 600; color: var(--color-danger); font-size: 14px; margin-top: 4px;"
+                  id="lbl-auto-alert-date">Select Expiry Date</div>
               </div>
               <div style="border-left: 1px solid var(--border-color); padding-left: 24px;">
-                <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Renewal Initiation Date (Auto-calc: 15d prior)</span>
-                <div style="font-weight: 600; color: var(--color-warning); font-size: 14px; margin-top: 4px;" id="lbl-auto-init-date">Select Expiry Date</div>
+                <span
+                  style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Renewal
+                  Initiation Date (Auto-calc: 15d prior)</span>
+                <div style="font-weight: 600; color: var(--color-warning); font-size: 14px; margin-top: 4px;"
+                  id="lbl-auto-init-date">Select Expiry Date</div>
               </div>
             </div>
 
@@ -978,8 +1131,10 @@
             <div class="form-group full-width">
               <label>Attachments (Copy of BG, Amendments, Renewal Letters)</label>
               <div class="file-upload-container" id="bg-file-zone">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
                 </svg>
                 <p>Drag & Drop files or click to browse</p>
                 <input type="file" id="bg-file-input" multiple onchange="handleFileSelect(event, 'bg-files-list')">
@@ -993,15 +1148,21 @@
         </form>
 
         <!-- BG Amendments Section (Visible only when editing an existing BG) -->
-        <div id="bg-amendments-section" style="display: none; border-top: 1px solid var(--border-color); padding-top: 24px; margin-top: 24px;">
-          <h4 style="font-family: var(--font-heading); font-size: 16px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div id="bg-amendments-section"
+          style="display: none; border-top: 1px solid var(--border-color); padding-top: 24px; margin-top: 24px;">
+          <h4
+            style="font-family: var(--font-heading); font-size: 16px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
             <span>BG Amendments History</span>
-            <button type="button" class="btn btn-secondary btn-sm" id="btn-toggle-amendment-form" onclick="toggleAmendmentForm(true)">+ Add Amendment</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-toggle-amendment-form"
+              onclick="toggleAmendmentForm(true)">+ Add Amendment</button>
           </h4>
-          
+
           <!-- Add Amendment Sub-form -->
-          <div id="amendment-form-panel" style="display: none; background-color: var(--bg-primary); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 16px;">
-            <h5 style="font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 12px;">Record New Amendment</h5>
+          <div id="amendment-form-panel"
+            style="display: none; background-color: var(--bg-primary); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 16px;">
+            <h5
+              style="font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 12px;">
+              Record New Amendment</h5>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
               <div class="form-group">
                 <label for="amd-date">Amendment Date <span style="color: var(--color-danger);">*</span></label>
@@ -1009,7 +1170,8 @@
               </div>
               <div class="form-group">
                 <label for="amd-amount">Revised BG Amount (₹)</label>
-                <input type="number" id="amd-amount" class="form-control" placeholder="Revised total value" min="1" step="any">
+                <input type="number" id="amd-amount" class="form-control" placeholder="Revised total value" min="1"
+                  step="any">
               </div>
               <div class="form-group">
                 <label for="amd-expiry">Revised Expiry Date</label>
@@ -1020,14 +1182,18 @@
                 <input type="text" id="amd-duration" class="form-control" placeholder="e.g. Extended by 6 mos">
               </div>
               <div class="form-group" style="grid-column: 1 / -1;">
-                <label for="amd-details">Amendment Description / Remarks <span style="color: var(--color-danger);">*</span></label>
-                <textarea id="amd-details" class="form-control" rows="2" placeholder="Describe the amendment (e.g. extension, amount value change)..."></textarea>
+                <label for="amd-details">Amendment Description / Remarks <span
+                    style="color: var(--color-danger);">*</span></label>
+                <textarea id="amd-details" class="form-control" rows="2"
+                  placeholder="Describe the amendment (e.g. extension, amount value change)..."></textarea>
               </div>
               <div class="form-group style-file" style="grid-column: 1 / -1;">
                 <label>Amendment Attachments (Amendment Copy, Bank Letters)</label>
                 <div class="file-upload-container" style="padding: 12px;" id="amd-file-zone">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px; margin-bottom: 4px;">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" style="width: 24px; height: 24px; margin-bottom: 4px;">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
                   </svg>
                   <p style="font-size: 12px;">Browse or drag files here</p>
                   <input type="file" id="amd-file-input" multiple onchange="handleFileSelect(event, 'amd-files-list')">
@@ -1036,7 +1202,8 @@
               </div>
             </div>
             <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;">
-              <button type="button" class="btn btn-secondary btn-sm" onclick="toggleAmendmentForm(false)">Cancel</button>
+              <button type="button" class="btn btn-secondary btn-sm"
+                onclick="toggleAmendmentForm(false)">Cancel</button>
               <button type="button" class="btn btn-primary btn-sm" onclick="saveAmdSubForm()">Apply Amendment</button>
             </div>
           </div>
@@ -1061,10 +1228,11 @@
           </div>
         </div>
       </div>
-      
+
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="closeModal('register-bg-modal')">Cancel</button>
-        <button type="button" class="btn btn-primary" onclick="submitRegisterForm()" id="btn-submit-bg-form">Save BG Details</button>
+        <button type="button" class="btn btn-primary" onclick="submitRegisterForm()" id="btn-submit-bg-form">Save BG
+          Details</button>
       </div>
     </div>
   </div>
@@ -1076,11 +1244,11 @@
         <h3 id="detail-modal-title">Record Details</h3>
         <button class="modal-close" onclick="closeModal('detail-view-modal')">&times;</button>
       </div>
-      
+
       <div class="modal-body" id="detail-modal-body">
         <!-- Rendered dynamically -->
       </div>
-      
+
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="closeModal('detail-view-modal')">Close</button>
       </div>
@@ -1089,4 +1257,5 @@
 
   <script src="js/app.js"></script>
 </body>
+
 </html>
