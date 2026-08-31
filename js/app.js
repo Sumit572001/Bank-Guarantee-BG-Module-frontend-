@@ -7,15 +7,38 @@ let currentUser = {
 let allRequests = [];
 let allRegister = [];
 let pendingFiles = [];
+let costCentersList = [];
 
 // Highrise ERP Cost Centers List
 const COST_CENTERS = [
-  'Pune Head Office (CC-101)',
-  'Mumbai Metro Line 3 Project (CC-102)',
-  'Nashik Highway Phase 1 (CC-103)',
-  'Delhi Airport Expansion (CC-104)',
-  'Goregaon Residential Complex (CC-105)',
-  'Kolkata IT Park Project (CC-106)'
+  'ATS-Byculla Mumbai',
+  'Bitsom Pilani - Kalyan, Mumbai',
+  'BMC - Dahisar Hub',
+  'Gera Imperium Gateway',
+  'Havmor Ice Cream Pvt Ltd - Talegaon',
+  'IICT Campus - Goregaon',
+  'IMCCPLTD- Ghansoli',
+  'Incubation Cent-Kalamboli',
+  'Medical College - Bhojpur',
+  'Medical College - Jalgaon',
+  'Medical College - Satara',
+  'Medical College- Munger',
+  'Metro Bhavan & Staff Quarters (MMRCL) - Mumbai',
+  'NHAI- DMIA',
+  'Phoenix Mall - Mohali',
+  'Police Housing - Kandivali',
+  'Police Housing Goregaon',
+  'Ratnagiri Air Terminal',
+  'Ratnagiri Rly. Platform Beautification',
+  'Redevelopment Of Ravi Shankar Shukla Market Bhopal',
+  'Saibaba Edu. Complex (Shirdi)',
+  'Smart City 1 and 2 - Ratnagiri',
+  'SSChandrpur',
+  'Symbiosis 1320 Hostel Lavale',
+  'Symbiosis Nagpur Hostel',
+  'Symbiosis SIBM Extension Lavale Campus',
+  'Symbiosis World School',
+  'Udaipur Air Terminal'
 ];
 
 // DOM Elements cache
@@ -59,6 +82,21 @@ function formatDate(dateStr) {
 }
 
 // Populate Cost Center elements
+async function loadCostCentersMaster() {
+  try {
+    const list = await fetchApi('/api/cost-centers');
+    if (list && Array.isArray(list) && list.length > 0) {
+      costCentersList = list.map(item => typeof item === 'object' ? item.name : item).filter(Boolean);
+    } else {
+      costCentersList = [...COST_CENTERS];
+    }
+  } catch (e) {
+    console.error('Error fetching cost centers master list:', e);
+    costCentersList = [...COST_CENTERS];
+  }
+  populateCostCenters();
+}
+
 function populateCostCenters() {
   const selects = [
     document.getElementById('req-cost-center-select'),
@@ -66,41 +104,43 @@ function populateCostCenters() {
     document.getElementById('cc-report-select')
   ];
 
+  const listToUse = (costCentersList && costCentersList.length > 0) ? costCentersList : COST_CENTERS;
+
   selects.forEach(select => {
     if (!select) return;
+    const currentVal = select.value;
     select.innerHTML = '';
 
-    // Add empty option first for the report filter
-    if (select.id === 'cc-report-select') {
-      const emptyOpt = document.createElement('option');
-      emptyOpt.value = '';
-      emptyOpt.textContent = '-- Select Cost Center --';
-      select.appendChild(emptyOpt);
-    }
+    const emptyOpt = document.createElement('option');
+    emptyOpt.value = '';
+    emptyOpt.textContent = '-- Select Cost Center --';
+    emptyOpt.selected = true;
+    select.appendChild(emptyOpt);
 
-    COST_CENTERS.forEach(cc => {
+    listToUse.forEach(cc => {
       const opt = document.createElement('option');
       opt.value = cc;
       opt.textContent = cc;
       select.appendChild(opt);
     });
+
+    if (currentVal && listToUse.includes(currentVal)) {
+      select.value = currentVal;
+    } else {
+      select.value = '';
+    }
   });
 }
 
-// Toggle between select and input for Cost Center based on type
+// Ensure Cost Center select is always a visible dropdown
 function toggleCostCenterField(selectId, inputId, bgType) {
   const select = document.getElementById(selectId);
   const input = document.getElementById(inputId);
-  if (!select || !input) return;
-
-  if (bgType === 'EMD') {
-    select.style.display = 'none';
-    select.required = false;
-    input.style.display = 'block';
-    input.required = true;
-  } else {
+  if (select) {
     select.style.display = 'block';
     select.required = true;
+  }
+  if (input) {
     input.style.display = 'none';
     input.required = false;
   }
@@ -226,8 +266,8 @@ window.addEventListener('DOMContentLoaded', () => {
   const reqDueDateInput = document.getElementById('req-due-date');
   if (reqDueDateInput) reqDueDateInput.min = today;
 
-  // Populate cost center lists
-  populateCostCenters();
+  // Populate cost center lists from master API / state
+  loadCostCentersMaster();
 
   // Initialize cost center view fields to match default EMD selection
   toggleCostCenterField('req-cost-center-select', 'req-cost-center-input', 'EMD');
@@ -422,12 +462,13 @@ function removePendingFile(fileId, listId) {
 function resetRequestForm() {
   const form = document.getElementById('raise-bg-request-form');
   if (form) form.reset();
+  const reqCcSelect = document.getElementById('req-cost-center-select');
+  if (reqCcSelect) reqCcSelect.value = '';
   const lists = ['req-list-bg-draft', 'req-list-loi', 'req-list-checklist', 'req-list-others'];
   lists.forEach(id => {
     const list = document.getElementById(id);
     if (list) list.innerHTML = '';
   });
-  toggleCostCenterField('req-cost-center-select', 'req-cost-center-input', 'EMD');
   pendingFiles = [];
 }
 
@@ -624,10 +665,14 @@ async function submitBgRequest(event) {
     }
   }
 
-  // Get Cost Center value based on EMD vs non-EMD
-  const costCenterVal = (bgType === 'EMD')
-    ? document.getElementById('req-cost-center-input').value
-    : document.getElementById('req-cost-center-select').value;
+  // Get Cost Center value from dropdown
+  const costCenterVal = document.getElementById('req-cost-center-select').value;
+  if (!costCenterVal) {
+    alert('Validation Error: Please select a Cost Center.');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit BG Request';
+    return;
+  }
 
   const payload = {
     projectRef: document.getElementById('req-project-ref').value,
@@ -768,6 +813,8 @@ async function loadRegister() {
   const register = await fetchApi('/api/register');
   allRegister = register;
 
+  populateRegisterBankFilterDropdown(register);
+
   const tbody = document.getElementById('register-tbody');
   tbody.innerHTML = '';
 
@@ -830,6 +877,7 @@ async function loadRegister() {
     tr.onclick = () => openDetailModal('bg', bg.id);
     tr.setAttribute('data-amount', bg.bgAmount || 0);
     tr.setAttribute('data-margin', bg.marginMoney || 0);
+    tr.setAttribute('data-bank', bg.issuingBank || '');
     tr.setAttribute('data-search', [
       bg.id, bg.bgNumber, bg.bgType, bg.beneficiary, bg.issuingBank, bg.siteName, effectiveStatus
     ].join(' ').toLowerCase());
@@ -849,21 +897,61 @@ async function loadRegister() {
   });
 
   // Render initial sums
-  filterRegisterTable('');
+  filterRegisterTable();
 }
 
-// Filter BG Register table by search text and recalculate totals
+function populateRegisterBankFilterDropdown(register) {
+  const select = document.getElementById('register-bank-filter');
+  if (!select) return;
+
+  const currentValue = select.value;
+
+  const defaultBanks = [
+    'Axis Bank',
+    'HDFC Bank',
+    'ICICI Bank',
+    'Kotak Mahindra Bank'
+  ];
+
+  const dataBanks = (register || []).map(bg => String(bg.issuingBank || '').trim()).filter(Boolean);
+  const allBanks = [...new Set([...defaultBanks, ...dataBanks])].sort();
+
+  select.innerHTML = '<option value="">All Banks</option>';
+  allBanks.forEach(bank => {
+    const opt = document.createElement('option');
+    opt.value = bank;
+    opt.textContent = bank;
+    select.appendChild(opt);
+  });
+
+  if (allBanks.includes(currentValue)) {
+    select.value = currentValue;
+  } else {
+    select.value = '';
+  }
+}
+
+// Filter BG Register table by search text and bank selection, recalculate totals for selected bank
 function filterRegisterTable(query) {
+  const searchInput = document.getElementById('register-search');
+  const bankSelect = document.getElementById('register-bank-filter');
+
+  const q = (query !== undefined ? query : (searchInput ? searchInput.value : '')).toLowerCase().trim();
+  const selectedBank = bankSelect ? bankSelect.value.toLowerCase().trim() : '';
+
   const rows = document.querySelectorAll('#register-tbody tr[data-search]');
-  const q = query.toLowerCase().trim();
-  
+
   let totalBgAmount = 0;
   let totalMarginMoney = 0;
 
   rows.forEach(row => {
-    const isVisible = (!q || row.getAttribute('data-search').includes(q));
+    const searchMatch = !q || row.getAttribute('data-search').includes(q);
+    const rowBank = (row.getAttribute('data-bank') || '').toLowerCase().trim();
+    const bankMatch = !selectedBank || rowBank === selectedBank || rowBank.includes(selectedBank);
+
+    const isVisible = searchMatch && bankMatch;
     row.style.display = isVisible ? '' : 'none';
-    
+
     if (isVisible) {
       totalBgAmount += parseFloat(row.getAttribute('data-amount') || 0);
       totalMarginMoney += parseFloat(row.getAttribute('data-margin') || 0);
@@ -1224,13 +1312,9 @@ function openRegisterModal(bgId = null) {
     document.getElementById('bg-form-released-date').value = bg.releasedDate || '';
     document.getElementById('bg-form-remarks').value = bg.remarks || '';
 
-    // Setup cost center field toggling and values
+    // Setup cost center field values
     toggleCostCenterField('bg-form-cost-center-select', 'bg-form-cost-center-input', bg.bgType);
-    if (bg.bgType === 'EMD') {
-      document.getElementById('bg-form-cost-center-input').value = bg.costCenter || '';
-    } else {
-      document.getElementById('bg-form-cost-center-select').value = bg.costCenter || COST_CENTERS[0];
-    }
+    document.getElementById('bg-form-cost-center-select').value = bg.costCenter || '';
 
     // Populate amendments history
     activeAmendments = bg.amendments || [];
@@ -1394,10 +1478,8 @@ async function submitRegisterForm() {
   const method = id ? 'PUT' : 'POST';
   const bgType = document.getElementById('bg-form-type').value;
 
-  // Get Cost Center value based on EMD vs non-EMD
-  const costCenterVal = (bgType === 'EMD')
-    ? document.getElementById('bg-form-cost-center-input').value
-    : document.getElementById('bg-form-cost-center-select').value;
+  // Get Cost Center value from dropdown
+  const costCenterVal = document.getElementById('bg-form-cost-center-select').value;
 
   const payload = {
     id: id || undefined,
@@ -1459,9 +1541,20 @@ async function openDetailModal(type, id) {
   const modal = document.getElementById('detail-view-modal');
   const title = document.getElementById('detail-modal-title');
   const body = document.getElementById('detail-modal-body');
+  const editHeaderBtn = document.getElementById('detail-modal-edit-btn');
 
   body.innerHTML = 'Loading record...';
   modal.classList.add('active');
+
+  if (type === 'bg' && editHeaderBtn) {
+    editHeaderBtn.style.display = 'inline-flex';
+    editHeaderBtn.onclick = () => {
+      closeModal('detail-view-modal');
+      openRegisterModal(id);
+    };
+  } else if (editHeaderBtn) {
+    editHeaderBtn.style.display = 'none';
+  }
 
   if (type === 'request') {
     title.textContent = `Request Details - ${id}`;
@@ -1607,6 +1700,15 @@ async function openDetailModal(type, id) {
 
     body.innerHTML = `
       <div style="display:flex; flex-direction:column; gap:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; background-color:var(--bg-primary); padding:10px 14px; border-radius:var(--radius-md); border:1px solid var(--border-color);">
+          <span style="font-size:13px; font-weight:600; color:var(--text-secondary);">Need to edit amount or details?</span>
+          <button class="btn btn-primary btn-sm" onclick="closeModal('detail-view-modal'); openRegisterModal('${bg.id}')" style="display:flex; align-items:center; gap:5px; padding:5px 14px; font-size:12px; font-weight:600;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:14px; height:14px;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+            </svg>
+            Edit BG Details
+          </button>
+        </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
           <div>
             <label style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">BG Number (Bank)</label>
@@ -2009,4 +2111,150 @@ function exportCostCenterCsv() {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+}
+
+// --- MANAGE COST CENTERS MODAL CONTROLLERS ---
+
+function renderCostCenterListModal(filterText = '') {
+  const container = document.getElementById('cc-modal-list-container');
+  const countSpan = document.getElementById('cc-modal-count');
+  if (!container) return;
+
+  const listToUse = (costCentersList && costCentersList.length > 0) ? costCentersList : COST_CENTERS;
+  const q = String(filterText || '').toLowerCase().trim();
+  const filtered = listToUse.filter(cc => !q || cc.toLowerCase().includes(q));
+
+  if (countSpan) countSpan.textContent = listToUse.length;
+
+  container.innerHTML = '';
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div style="padding: 16px; text-align: center; color: var(--text-muted); font-size: 13px;">No matching cost centers found.</div>`;
+    return;
+  }
+
+  filtered.forEach(ccName => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--border-color); background: var(--bg-primary);';
+
+    const escapedName = ccName.replace(/'/g, "\\'");
+
+    row.innerHTML = `
+      <span style="font-weight: 600; font-size: 13px; color: var(--text-primary);">${ccName}</span>
+      <div style="display: flex; gap: 6px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="editCostCenterItem('${escapedName}')" style="padding: 3px 10px; font-size: 11px;">
+          ✏️ Edit
+        </button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="deleteCostCenterItem('${escapedName}')" style="padding: 3px 10px; font-size: 11px;">
+          🗑️ Delete
+        </button>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function openManageCostCentersModal() {
+  const searchInput = document.getElementById('cc-modal-search');
+  const newCcInput = document.getElementById('new-cost-center-input');
+  if (searchInput) searchInput.value = '';
+  if (newCcInput) newCcInput.value = '';
+  renderCostCenterListModal('');
+  const modal = document.getElementById('manage-cost-centers-modal');
+  if (modal) modal.classList.add('active');
+}
+
+function filterCostCenterListModal(query) {
+  renderCostCenterListModal(query);
+}
+
+async function addNewCostCenter() {
+  const input = document.getElementById('new-cost-center-input');
+  if (!input) return;
+  const newName = input.value.trim();
+
+  if (!newName) {
+    alert('Please enter a cost center / project name.');
+    return;
+  }
+
+  const listToUse = (costCentersList && costCentersList.length > 0) ? costCentersList : COST_CENTERS;
+
+  if (listToUse.some(name => name.toLowerCase() === newName.toLowerCase())) {
+    alert(`Cost center "${newName}" already exists.`);
+    return;
+  }
+
+  try {
+    const res = await fetchApi('/api/cost-centers', {
+      method: 'POST',
+      body: JSON.stringify({ name: newName })
+    });
+
+    if (res.success) {
+      input.value = '';
+      await loadCostCentersMaster();
+      renderCostCenterListModal('');
+
+      // Auto select the newly added cost center in Raise BG form
+      const reqSelect = document.getElementById('req-cost-center-select');
+      if (reqSelect) reqSelect.value = newName;
+
+      alert(`Cost center "${newName}" added successfully!`);
+    }
+  } catch (err) {
+    console.error('Error adding cost center:', err);
+  }
+}
+
+async function editCostCenterItem(oldName) {
+  const newName = prompt(`Edit Cost Center / Project Name:\n\n(This will update "${oldName}" everywhere across all requests and register entries)`, oldName);
+  if (!newName || newName.trim() === '' || newName.trim() === oldName) return;
+
+  const cleanNew = newName.trim();
+  const listToUse = (costCentersList && costCentersList.length > 0) ? costCentersList : COST_CENTERS;
+
+  if (listToUse.some(name => name.toLowerCase() === cleanNew.toLowerCase() && name.toLowerCase() !== oldName.toLowerCase())) {
+    alert(`Cost center "${cleanNew}" already exists.`);
+    return;
+  }
+
+  try {
+    const res = await fetchApi('/api/cost-centers', {
+      method: 'PUT',
+      body: JSON.stringify({ oldName: oldName, newName: cleanNew })
+    });
+
+    if (res.success) {
+      await loadCostCentersMaster();
+      renderCostCenterListModal('');
+
+      // Reload views to reflect updated name in real-time
+      if (typeof loadRequests === 'function') loadRequests();
+      if (typeof loadRegister === 'function') loadRegister();
+
+      alert(`Cost center updated successfully from "${oldName}" to "${cleanNew}" across all records!`);
+    }
+  } catch (err) {
+    console.error('Error editing cost center:', err);
+  }
+}
+
+async function deleteCostCenterItem(name) {
+  if (!confirm(`Are you sure you want to delete Cost Center "${name}"?`)) return;
+
+  try {
+    const res = await fetchApi('/api/cost-centers', {
+      method: 'DELETE',
+      body: JSON.stringify({ name: name })
+    });
+
+    if (res.success) {
+      await loadCostCentersMaster();
+      renderCostCenterListModal('');
+      alert(`Cost center "${name}" deleted successfully.`);
+    }
+  } catch (err) {
+    console.error('Error deleting cost center:', err);
+  }
 }

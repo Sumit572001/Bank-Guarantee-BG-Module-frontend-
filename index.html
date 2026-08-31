@@ -393,12 +393,15 @@
               </div>
 
               <div class="form-group" id="req-cost-center-group">
-                <label id="req-cost-center-label">Cost Center <span style="color: var(--color-danger);">*</span></label>
-                <select id="req-cost-center-select" class="form-control" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <label id="req-cost-center-label" for="req-cost-center-select" style="margin-bottom: 0;">Cost Center <span style="color: var(--color-danger);">*</span></label>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="openManageCostCentersModal()" style="font-size: 11px; padding: 2px 8px; height: 24px; font-weight: 600;">
+                    + Add New Cost Center
+                  </button>
+                </div>
+                <select id="req-cost-center-select" class="form-control" required>
                   <!-- Dynamically populated via JS -->
                 </select>
-                <input type="text" id="req-cost-center-input" class="form-control"
-                  placeholder="e.g. Pune Project Office">
               </div>
 
               <div class="form-group">
@@ -573,7 +576,11 @@
             <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
               <input type="text" id="register-search" class="filter-control"
                 placeholder="🔍  Search BG No, Beneficiary..." oninput="filterRegisterTable(this.value)"
-                style="min-width:230px; height:35px;">
+                style="min-width:220px; height:35px;">
+              <select id="register-bank-filter" class="filter-control" onchange="filterRegisterTable()"
+                style="min-width:170px; height:35px; cursor:pointer;">
+                <option value="">All Banks</option>
+              </select>
               <button class="btn btn-success btn-sm" onclick="exportRegisterCsv()"
                 style="height:35px; padding: 0 14px;">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -1074,13 +1081,15 @@
             </div>
 
             <div class="form-group" id="bg-form-cost-center-group">
-              <label id="bg-form-cost-center-label">Cost Center <span
-                  style="color: var(--color-danger);">*</span></label>
-              <select id="bg-form-cost-center-select" class="form-control" style="display: none;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <label id="bg-form-cost-center-label" for="bg-form-cost-center-select" style="margin-bottom: 0;">Cost Center <span style="color: var(--color-danger);">*</span></label>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openManageCostCentersModal()" style="font-size: 11px; padding: 2px 8px; height: 24px; font-weight: 600;">
+                  + Add New Cost Center
+                </button>
+              </div>
+              <select id="bg-form-cost-center-select" class="form-control" required>
                 <!-- Dynamically populated via JS -->
               </select>
-              <input type="text" id="bg-form-cost-center-input" class="form-control"
-                placeholder="Accounting Cost Center">
             </div>
 
             <div class="form-group">
@@ -1242,7 +1251,15 @@
     <div class="modal-card" style="max-width: 650px;">
       <div class="modal-header">
         <h3 id="detail-modal-title">Record Details</h3>
-        <button class="modal-close" onclick="closeModal('detail-view-modal')">&times;</button>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button id="detail-modal-edit-btn" class="btn btn-primary btn-sm" style="display: none; height: 32px; padding: 0 12px; font-size: 12px; font-weight: 600; align-items: center; gap: 4px;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:14px; height:14px;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+            </svg>
+            Edit Details
+          </button>
+          <button class="modal-close" onclick="closeModal('detail-view-modal')">&times;</button>
+        </div>
       </div>
 
       <div class="modal-body" id="detail-modal-body">
@@ -1251,6 +1268,51 @@
 
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="closeModal('detail-view-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal C: Manage Cost Centers Modal -->
+  <div class="modal-overlay" id="manage-cost-centers-modal">
+    <div class="modal-card" style="max-width: 600px; width: 95%;">
+      <div class="modal-header">
+        <h3>Add / Manage Cost Centers</h3>
+        <button class="modal-close" onclick="closeModal('manage-cost-centers-modal')">&times;</button>
+      </div>
+
+      <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
+        <!-- Add New Cost Center Box -->
+        <div style="background: var(--bg-primary); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 20px;">
+          <label for="new-cost-center-input" style="font-weight: 700; font-size: 13px; display: block; margin-bottom: 8px; color: var(--text-primary);">
+            Add New Cost Center / Project
+          </label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="new-cost-center-input" class="form-control" placeholder="Type new cost center name..." style="flex: 1;" onkeypress="if(event.key === 'Enter'){ event.preventDefault(); addNewCostCenter(); }">
+            <button type="button" class="btn btn-primary" onclick="addNewCostCenter()" style="white-space: nowrap;">
+              Save Cost Center
+            </button>
+          </div>
+        </div>
+
+        <!-- Existing Cost Centers List Section -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h4 style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin: 0;">
+              All Cost Centers (<span id="cc-modal-count">0</span>)
+            </h4>
+            <input type="text" id="cc-modal-search" class="filter-control" placeholder="🔍 Search list..." oninput="filterCostCenterListModal(this.value)" style="width: 190px; height: 32px; font-size: 12px;">
+          </div>
+
+          <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); max-height: 320px; overflow-y: auto; background: var(--bg-primary);">
+            <div id="cc-modal-list-container" style="display: flex; flex-direction: column;">
+              <!-- Dynamically populated list items -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('manage-cost-centers-modal')">Close</button>
       </div>
     </div>
   </div>
