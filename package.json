@@ -1,0 +1,9 @@
+{
+  "name": "bg-frontend",
+  "version": "1.0.0",
+  "description": "Bank Guarantee Module Frontend",
+  "scripts": {
+    "start": "npm --prefix ../BG-Backend start",
+    "dev": "npm --prefix ../BG-Backend start"
+  }
+}

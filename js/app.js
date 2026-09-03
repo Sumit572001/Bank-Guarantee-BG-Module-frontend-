@@ -188,11 +188,19 @@ function updateAuthUI() {
     if (roleDisplay) roleDisplay.textContent = currentUser.role;
     if (avatarDisplay) avatarDisplay.textContent = initials;
 
+    const companyBadge = document.getElementById('user-company-role-badge');
+    const activeCompanyRole = currentUser.companyRole || 'EPC';
+    if (companyBadge) {
+      companyBadge.textContent = activeCompanyRole;
+      companyBadge.className = `badge ${activeCompanyRole === 'RE' ? 'badge-warning' : 'badge-active'}`;
+    }
+
     if (footerName) footerName.textContent = nameToUse;
     if (footerRole) footerRole.textContent = currentUser.role;
     if (footerAvatar) footerAvatar.textContent = initials;
 
     handleRoleChange(currentUser.role);
+    updateReRoleVisibility();
   } else {
     document.body.classList.add('auth-page');
     if (signedInBox) signedInBox.style.display = 'none';
@@ -203,8 +211,66 @@ function updateAuthUI() {
   }
 }
 
+function updateReRoleVisibility() {
+  const isRe = currentUser && currentUser.companyRole === 'RE';
+
+  const thCompany = document.getElementById('th-register-company');
+  if (thCompany) thCompany.style.display = isRe ? '' : 'none';
+
+  const filterCompany = document.getElementById('register-company-filter');
+  if (filterCompany) filterCompany.style.display = isRe ? 'inline-block' : 'none';
+
+  const bgFormGroup = document.getElementById('bg-form-company-group');
+  const bgFormSelect = document.getElementById('bg-form-company-name');
+  if (bgFormGroup) bgFormGroup.style.display = isRe ? 'flex' : 'none';
+  if (bgFormSelect) bgFormSelect.required = isRe;
+
+  const reqFormGroup = document.getElementById('req-company-group');
+  const reqFormSelect = document.getElementById('req-company-name');
+  if (reqFormGroup) reqFormGroup.style.display = isRe ? 'flex' : 'none';
+  if (reqFormSelect) reqFormSelect.required = isRe;
+}
+
+function selectLoginRole(role) {
+  const hiddenInput = document.getElementById('login-company-role');
+  const btnEpc = document.getElementById('role-btn-epc');
+  const btnRe = document.getElementById('role-btn-re');
+
+  if (hiddenInput) hiddenInput.value = role;
+
+  if (role === 'RE') {
+    if (btnRe) {
+      btnRe.style.backgroundColor = 'var(--color-primary)';
+      btnRe.style.color = '#ffffff';
+      btnRe.style.boxShadow = '0 2px 6px rgba(37, 99, 235, 0.25)';
+      btnRe.classList.add('active');
+    }
+    if (btnEpc) {
+      btnEpc.style.backgroundColor = 'transparent';
+      btnEpc.style.color = 'var(--text-secondary)';
+      btnEpc.style.boxShadow = 'none';
+      btnEpc.classList.remove('active');
+    }
+  } else {
+    if (btnEpc) {
+      btnEpc.style.backgroundColor = 'var(--color-primary)';
+      btnEpc.style.color = '#ffffff';
+      btnEpc.style.boxShadow = '0 2px 6px rgba(37, 99, 235, 0.25)';
+      btnEpc.classList.add('active');
+    }
+    if (btnRe) {
+      btnRe.style.backgroundColor = 'transparent';
+      btnRe.style.color = 'var(--text-secondary)';
+      btnRe.style.boxShadow = 'none';
+      btnRe.classList.remove('active');
+    }
+  }
+}
+
 async function handleLoginSubmit(event) {
   event.preventDefault();
+  const companyRoleSelect = document.getElementById('login-company-role');
+  const companyRoleInput = companyRoleSelect ? companyRoleSelect.value : 'EPC';
   const usernameInput = document.getElementById('login-username').value.trim();
   const passwordInput = document.getElementById('login-password').value;
   const errorMsg = document.getElementById('login-error-msg');
@@ -221,7 +287,11 @@ async function handleLoginSubmit(event) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ username: usernameInput, password: passwordInput })
+      body: JSON.stringify({
+        username: usernameInput,
+        password: passwordInput,
+        companyRole: companyRoleInput
+      })
     });
 
     const data = await res.json();
@@ -250,14 +320,48 @@ async function handleLoginSubmit(event) {
   }
 }
 
-function handleSignOut() {
-  currentUser = { isLoggedIn: false };
+function handleSignOut(event) {
+  if (event) {
+    if (typeof event.preventDefault === 'function') event.preventDefault();
+    if (typeof event.stopPropagation === 'function') event.stopPropagation();
+  }
+
+  // Clear all saved user session data from browser storage
   localStorage.removeItem('highrise_bg_user');
-  updateAuthUI();
+  localStorage.clear();
+  sessionStorage.clear();
+
+  // Reset internal memory state
+  currentUser = { isLoggedIn: false };
+
+  // Immediately update UI to show lockscreen & hide auth contents
+  document.body.classList.add('auth-page');
+  const signedInBox = document.getElementById('user-signed-in-box');
+  const signedOutBox = document.getElementById('user-signed-out-box');
+  const lockScreen = document.getElementById('logged-out-lockscreen');
+  const headerProfile = document.getElementById('header-user-profile');
+
+  if (signedInBox) signedInBox.style.display = 'none';
+  if (signedOutBox) signedOutBox.style.display = 'flex';
+  if (lockScreen) lockScreen.style.display = 'flex';
+  if (headerProfile) headerProfile.style.display = 'none';
+
+  // Navigate to clean URL root without history stack
+  window.location.replace(window.location.protocol + '//' + window.location.host + window.location.pathname);
 }
+
+window.handleSignOut = handleSignOut;
 
 // Initializer
 window.addEventListener('DOMContentLoaded', () => {
+  // Global Sign Out Listener
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-signout') || e.target.closest('#btn-sidebar-signout');
+    if (btn) {
+      window.handleSignOut(e);
+    }
+  });
+
   // Initialize Auth State & UI
   initAuthState();
 
@@ -522,7 +626,13 @@ function handleStatusChange(status) {
 // --- GET API DATA ---
 async function fetchApi(endpoint, options = {}) {
   try {
-    const res = await fetch(`${API_URL}${endpoint}`, {
+    const roleParam = (currentUser && currentUser.companyRole) ? currentUser.companyRole : 'EPC';
+    let url = `${API_URL}${endpoint}`;
+    if (!url.includes('companyRole=')) {
+      url += (url.includes('?') ? '&' : '?') + `companyRole=${encodeURIComponent(roleParam)}`;
+    }
+
+    const res = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
         ...options.headers
@@ -674,7 +784,20 @@ async function submitBgRequest(event) {
     return;
   }
 
+  const isRe = currentUser && currentUser.companyRole === 'RE';
+  const reqCompanySelect = document.getElementById('req-company-name');
+  const companyNameVal = isRe && reqCompanySelect ? reqCompanySelect.value : '';
+
+  if (isRe && !companyNameVal) {
+    alert('Validation Error: Please select a Company / Entity Name.');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit BG Request';
+    return;
+  }
+
   const payload = {
+    companyRole: currentUser.companyRole || 'EPC',
+    companyName: companyNameVal,
     projectRef: document.getElementById('req-project-ref').value,
     bgType: bgType,
     costCenter: costCenterVal,
@@ -810,6 +933,9 @@ async function updateRequestStatus(id, newStatus) {
 
 // 4. BG Register View
 async function loadRegister() {
+  const isRe = currentUser && currentUser.companyRole === 'RE';
+  updateReRoleVisibility();
+
   const register = await fetchApi('/api/register');
   allRegister = register;
 
@@ -818,8 +944,10 @@ async function loadRegister() {
   const tbody = document.getElementById('register-tbody');
   tbody.innerHTML = '';
 
+  const colSpanCount = isRe ? 11 : 10;
+
   if (register.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: var(--text-muted);">No guarantees registered yet.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="${colSpanCount}" style="text-align: center; color: var(--text-muted);">No guarantees registered yet.</td></tr>`;
     return;
   }
 
@@ -878,12 +1006,17 @@ async function loadRegister() {
     tr.setAttribute('data-amount', bg.bgAmount || 0);
     tr.setAttribute('data-margin', bg.marginMoney || 0);
     tr.setAttribute('data-bank', bg.issuingBank || '');
+    tr.setAttribute('data-company', bg.companyName || '');
     tr.setAttribute('data-search', [
-      bg.id, bg.bgNumber, bg.bgType, bg.beneficiary, bg.issuingBank, bg.siteName, effectiveStatus
+      bg.id, bg.bgNumber, bg.companyName || '', bg.bgType, bg.beneficiary, bg.issuingBank, bg.siteName, effectiveStatus
     ].join(' ').toLowerCase());
+
+    const companyCol = isRe ? `<td class="col-wrap" style="font-weight:600; color:var(--text-primary);">${bg.companyName || '—'}</td>` : '';
+
     tr.innerHTML = `
       <td style="font-weight:700; color: var(--color-primary);">${bg.id}</td>
       <td>${bg.bgNumber || '<span style="color:var(--color-warning); font-weight:600;">Pending Issuance</span>'}${amdCount}</td>
+      ${companyCol}
       <td>${bg.bgType}</td>
       <td class="col-wrap">${bg.beneficiary}</td>
       <td class="col-wrap">${bg.issuingBank || 'N/A'}</td>
@@ -933,11 +1066,14 @@ function populateRegisterBankFilterDropdown(register) {
 
 // Filter BG Register table by search text and bank selection, recalculate totals for selected bank
 function filterRegisterTable(query) {
+  const isRe = currentUser && currentUser.companyRole === 'RE';
   const searchInput = document.getElementById('register-search');
   const bankSelect = document.getElementById('register-bank-filter');
+  const companySelect = document.getElementById('register-company-filter');
 
   const q = (query !== undefined ? query : (searchInput ? searchInput.value : '')).toLowerCase().trim();
   const selectedBank = bankSelect ? bankSelect.value.toLowerCase().trim() : '';
+  const selectedCompany = (isRe && companySelect) ? companySelect.value.toLowerCase().trim() : '';
 
   const rows = document.querySelectorAll('#register-tbody tr[data-search]');
 
@@ -948,8 +1084,10 @@ function filterRegisterTable(query) {
     const searchMatch = !q || row.getAttribute('data-search').includes(q);
     const rowBank = (row.getAttribute('data-bank') || '').toLowerCase().trim();
     const bankMatch = !selectedBank || rowBank === selectedBank || rowBank.includes(selectedBank);
+    const rowCompany = (row.getAttribute('data-company') || '').toLowerCase().trim();
+    const companyMatch = !selectedCompany || rowCompany === selectedCompany;
 
-    const isVisible = searchMatch && bankMatch;
+    const isVisible = searchMatch && bankMatch && companyMatch;
     row.style.display = isVisible ? '' : 'none';
 
     if (isVisible) {
@@ -1312,6 +1450,10 @@ function openRegisterModal(bgId = null) {
     document.getElementById('bg-form-released-date').value = bg.releasedDate || '';
     document.getElementById('bg-form-remarks').value = bg.remarks || '';
 
+    updateReRoleVisibility();
+    const bgCompanySelect = document.getElementById('bg-form-company-name');
+    if (bgCompanySelect) bgCompanySelect.value = bg.companyName || '';
+
     // Setup cost center field values
     toggleCostCenterField('bg-form-cost-center-select', 'bg-form-cost-center-input', bg.bgType);
     document.getElementById('bg-form-cost-center-select').value = bg.costCenter || '';
@@ -1480,9 +1622,21 @@ async function submitRegisterForm() {
 
   // Get Cost Center value from dropdown
   const costCenterVal = document.getElementById('bg-form-cost-center-select').value;
+  const isRe = currentUser && currentUser.companyRole === 'RE';
+  const bgFormCompanySelect = document.getElementById('bg-form-company-name');
+  const companyNameVal = isRe && bgFormCompanySelect ? bgFormCompanySelect.value : '';
+
+  if (isRe && !companyNameVal) {
+    alert('Validation Error: Please select a Company / Entity Name.');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Save BG Details';
+    return;
+  }
 
   const payload = {
     id: id || undefined,
+    companyRole: currentUser.companyRole || 'EPC',
+    companyName: companyNameVal,
     requestId: document.getElementById('bg-form-request-id').value || undefined,
     bgNumber: document.getElementById('bg-form-number').value,
     bgType: bgType,

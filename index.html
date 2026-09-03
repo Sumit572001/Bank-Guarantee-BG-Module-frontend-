@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <base href="/Bank_Guarantee_Module/">
+  <base href="/">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bank Guarantee (BG) Module - Nyati Group</title>
@@ -106,7 +106,7 @@
             <span class="user-name" id="footer-user-name">Sumit Verma</span>
           </div>
         </div>
-        <button class="btn-auth btn-signout" onclick="handleSignOut()" title="Sign Out">
+        <button type="button" id="btn-sidebar-signout" class="btn-auth btn-signout" onclick="window.handleSignOut(event)" title="Sign Out">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
             stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round"
@@ -146,8 +146,9 @@
       <div class="header-actions">
         <div class="user-profile" id="header-user-profile">
           <div class="user-avatar" id="user-avatar-initials">SV</div>
-          <div class="user-info">
+          <div class="user-info" style="display: flex; align-items: center; gap: 8px;">
             <span class="user-name" id="user-name-display">Sumit Verma</span>
+            <span id="user-company-role-badge" class="badge badge-active" style="font-size: 11px; padding: 2px 8px;">EPC</span>
           </div>
         </div>
         <button class="btn btn-primary btn-sm" id="header-signin-btn" onclick="openSignInModal()"
@@ -181,6 +182,23 @@
           <div id="login-error-msg"
             style="display: none; background-color: rgba(239, 68, 68, 0.1); color: var(--color-danger); border: 1px solid rgba(239, 68, 68, 0.2); padding: 10px; border-radius: var(--radius-md); font-size: 13px; margin-bottom: 16px; font-weight: 500; text-align: center;">
             Invalid Username/Email or Password.
+          </div>
+
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label style="font-weight: 700; font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
+              Select Role / Division <span style="color: var(--color-danger);">*</span>
+            </label>
+            <div class="role-switcher-container" style="display: flex; background: var(--bg-primary); padding: 4px; border-radius: var(--radius-md); border: 1.5px solid var(--border-color); gap: 6px;">
+              <button type="button" id="role-btn-epc" class="role-switch-btn active" onclick="selectLoginRole('EPC')"
+                style="flex: 1; padding: 10px 14px; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; background-color: var(--color-primary); color: #ffffff; box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);">
+                🏢 EPC Division
+              </button>
+              <button type="button" id="role-btn-re" class="role-switch-btn" onclick="selectLoginRole('RE')"
+                style="flex: 1; padding: 10px 14px; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; background-color: transparent; color: var(--text-secondary);">
+                🏗️ RE Division
+              </button>
+            </div>
+            <input type="hidden" id="login-company-role" value="EPC">
           </div>
 
           <div class="form-group" style="margin-bottom: 16px;">
@@ -372,6 +390,21 @@
 
           <form id="raise-bg-request-form" onsubmit="submitBgRequest(event)">
             <div class="form-grid">
+
+              <div class="form-group" id="req-company-group" style="display: none;">
+                <label for="req-company-name">Company / Entity Name <span style="color: var(--color-danger);">*</span></label>
+                <select id="req-company-name" class="form-control">
+                  <option value="">-- Select Company / Entity --</option>
+                  <option value="Nyati Builders Pvt Ltd">Nyati Builders Pvt Ltd</option>
+                  <option value="Nyati Land Mark Project LLP">Nyati Land Mark Project LLP</option>
+                  <option value="Mihir Homes Enterprises LLP">Mihir Homes Enterprises LLP</option>
+                  <option value="P Square Builders LLP">P Square Builders LLP</option>
+                  <option value="Nyati Construction Pvt Ltd">Nyati Construction Pvt Ltd</option>
+                  <option value="Nyati Relators LLP">Nyati Relators LLP</option>
+                  <option value="Nyati Columbia Pacific Senior Living Pvt Ltd">Nyati Columbia Pacific Senior Living Pvt Ltd</option>
+                  <option value="Nyati Shubham Nirman Developers LLP">Nyati Shubham Nirman Developers LLP</option>
+                </select>
+              </div>
 
               <div class="form-group">
                 <label for="req-project-ref">Project / Contract Ref <span
@@ -581,6 +614,18 @@
                 style="min-width:170px; height:35px; cursor:pointer;">
                 <option value="">All Banks</option>
               </select>
+              <select id="register-company-filter" class="filter-control" onchange="filterRegisterTable()"
+                style="min-width:200px; height:35px; cursor:pointer; display:none;">
+                <option value="">All Companies / Entities</option>
+                <option value="Nyati Builders Pvt Ltd">Nyati Builders Pvt Ltd</option>
+                <option value="Nyati Land Mark Project LLP">Nyati Land Mark Project LLP</option>
+                <option value="Mihir Homes Enterprises LLP">Mihir Homes Enterprises LLP</option>
+                <option value="P Square Builders LLP">P Square Builders LLP</option>
+                <option value="Nyati Construction Pvt Ltd">Nyati Construction Pvt Ltd</option>
+                <option value="Nyati Relators LLP">Nyati Relators LLP</option>
+                <option value="Nyati Columbia Pacific Senior Living Pvt Ltd">Nyati Columbia Pacific Senior Living Pvt Ltd</option>
+                <option value="Nyati Shubham Nirman Developers LLP">Nyati Shubham Nirman Developers LLP</option>
+              </select>
               <button class="btn btn-success btn-sm" onclick="exportRegisterCsv()"
                 style="height:35px; padding: 0 14px;">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -636,6 +681,7 @@
                   <tr>
                     <th>BG Ref ID</th>
                     <th>BG Number</th>
+                    <th id="th-register-company" style="display: none;">Company / Entity Name</th>
                     <th>Type</th>
                     <th>Beneficiary</th>
                     <th>Issuing Bank</th>
@@ -1026,6 +1072,21 @@
             <div class="form-group">
               <label for="bg-form-sitename">Name of Site / Project Ref</label>
               <input type="text" id="bg-form-sitename" class="form-control" placeholder="Site or Project reference">
+            </div>
+
+            <div class="form-group" id="bg-form-company-group" style="display: none;">
+              <label for="bg-form-company-name">Company / Entity Name <span style="color: var(--color-danger);">*</span></label>
+              <select id="bg-form-company-name" class="form-control">
+                <option value="">-- Select Company / Entity --</option>
+                <option value="Nyati Builders Pvt Ltd">Nyati Builders Pvt Ltd</option>
+                <option value="Nyati Land Mark Project LLP">Nyati Land Mark Project LLP</option>
+                <option value="Mihir Homes Enterprises LLP">Mihir Homes Enterprises LLP</option>
+                <option value="P Square Builders LLP">P Square Builders LLP</option>
+                <option value="Nyati Construction Pvt Ltd">Nyati Construction Pvt Ltd</option>
+                <option value="Nyati Relators LLP">Nyati Relators LLP</option>
+                <option value="Nyati Columbia Pacific Senior Living Pvt Ltd">Nyati Columbia Pacific Senior Living Pvt Ltd</option>
+                <option value="Nyati Shubham Nirman Developers LLP">Nyati Shubham Nirman Developers LLP</option>
+              </select>
             </div>
 
             <div class="form-group">
