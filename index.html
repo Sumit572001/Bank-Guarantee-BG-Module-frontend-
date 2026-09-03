@@ -236,6 +236,22 @@
       <!-- 1. DASHBOARD VIEW -->
       <section id="view-dashboard" class="view-section active">
 
+        <!-- Top Entity Filter Bar for RE Division -->
+        <div id="dashboard-company-filter-wrapper" style="display: none; margin-bottom: 20px; justify-content: flex-end; align-items: center; gap: 10px;">
+          <label for="dashboard-company-filter" style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">Company / Entity Filter:</label>
+          <select id="dashboard-company-filter" class="filter-control" onchange="loadDashboard()" style="min-width: 240px; height: 36px; cursor: pointer; background-color: var(--bg-secondary);">
+            <option value="">All Companies / Entities</option>
+            <option value="Nyati Builders Pvt Ltd">Nyati Builders Pvt Ltd</option>
+            <option value="Nyati Land Mark Project LLP">Nyati Land Mark Project LLP</option>
+            <option value="Mihir Homes Enterprises LLP">Mihir Homes Enterprises LLP</option>
+            <option value="P Square Builders LLP">P Square Builders LLP</option>
+            <option value="Nyati Construction Pvt Ltd">Nyati Construction Pvt Ltd</option>
+            <option value="Nyati Relators LLP">Nyati Relators LLP</option>
+            <option value="Nyati Columbia Pacific Senior Living Pvt Ltd">Nyati Columbia Pacific Senior Living Pvt Ltd</option>
+            <option value="Nyati Shubham Nirman Developers LLP">Nyati Shubham Nirman Developers LLP</option>
+          </select>
+        </div>
+
         <!-- Metrics Grid -->
         <div class="metrics-grid">
 
@@ -324,6 +340,7 @@
                   <tr>
                     <th>BG Ref ID</th>
                     <th>BG Number</th>
+                    <th id="th-dashboard-company" style="display: none;">Company / Entity Name</th>
                     <th>Type</th>
                     <th>Beneficiary</th>
                     <th>Amount</th>
@@ -742,6 +759,21 @@
             <label for="filter-bank">Issuing Bank</label>
             <select id="filter-bank" class="filter-control" onchange="applyFilters()">
               <option value="">All Banks</option>
+            </select>
+          </div>
+
+          <div class="filter-item" id="reports-company-filter-item" style="display: none;">
+            <label for="filter-company">Company / Entity</label>
+            <select id="filter-company" class="filter-control" onchange="applyFilters()">
+              <option value="">All Companies / Entities</option>
+              <option value="Nyati Builders Pvt Ltd">Nyati Builders Pvt Ltd</option>
+              <option value="Nyati Land Mark Project LLP">Nyati Land Mark Project LLP</option>
+              <option value="Mihir Homes Enterprises LLP">Mihir Homes Enterprises LLP</option>
+              <option value="P Square Builders LLP">P Square Builders LLP</option>
+              <option value="Nyati Construction Pvt Ltd">Nyati Construction Pvt Ltd</option>
+              <option value="Nyati Relators LLP">Nyati Relators LLP</option>
+              <option value="Nyati Columbia Pacific Senior Living Pvt Ltd">Nyati Columbia Pacific Senior Living Pvt Ltd</option>
+              <option value="Nyati Shubham Nirman Developers LLP">Nyati Shubham Nirman Developers LLP</option>
             </select>
           </div>
 

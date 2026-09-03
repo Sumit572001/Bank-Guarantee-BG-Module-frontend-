@@ -217,8 +217,17 @@ function updateReRoleVisibility() {
   const thCompany = document.getElementById('th-register-company');
   if (thCompany) thCompany.style.display = isRe ? '' : 'none';
 
+  const thDashCompany = document.getElementById('th-dashboard-company');
+  if (thDashCompany) thDashCompany.style.display = isRe ? '' : 'none';
+
   const filterCompany = document.getElementById('register-company-filter');
   if (filterCompany) filterCompany.style.display = isRe ? 'inline-block' : 'none';
+
+  const dashCompanyWrapper = document.getElementById('dashboard-company-filter-wrapper');
+  if (dashCompanyWrapper) dashCompanyWrapper.style.display = isRe ? 'flex' : 'none';
+
+  const reportsCompanyItem = document.getElementById('reports-company-filter-item');
+  if (reportsCompanyItem) reportsCompanyItem.style.display = isRe ? 'flex' : 'none';
 
   const bgFormGroup = document.getElementById('bg-form-company-group');
   const bgFormSelect = document.getElementById('bg-form-company-name');
@@ -651,23 +660,48 @@ async function fetchApi(endpoint, options = {}) {
   }
 }
 
-// --- VIEW LOADER HANDLERS ---
+// --- VIEW LOADER ---
 
 // 1. Dashboard View
 async function loadDashboard() {
-  const dashboardData = await fetchApi('/api/dashboard');
-  if (!dashboardData) return;
+  updateReRoleVisibility();
+  const register = await fetchApi('/api/register');
+  allRegister = register;
+
+  const isRe = currentUser && currentUser.companyRole === 'RE';
+  const filterSelect = document.getElementById('dashboard-company-filter');
+  const selectedCompany = (isRe && filterSelect) ? filterSelect.value : '';
+
+  let bgsToUse = register;
+  if (selectedCompany) {
+    bgsToUse = register.filter(bg => (bg.companyName || '').toLowerCase() === selectedCompany.toLowerCase());
+  }
+
+  const now = new Date();
+  const thirtyDays = new Date();
+  thirtyDays.setDate(now.getDate() + 30);
+
+  const activeBgs = bgsToUse.filter(bg => bg.status === 'Active');
+  const outstandingCount = activeBgs.length;
+  const totalAmount = activeBgs.reduce((sum, bg) => sum + (parseFloat(bg.bgAmount) || 0), 0);
+  const totalMarginMoney = activeBgs.reduce((sum, bg) => sum + (parseFloat(bg.marginMoney) || 0), 0);
+
+  const urgentCount = activeBgs.filter(bg => {
+    if (!bg.expiryDate) return false;
+    const exp = new Date(bg.expiryDate);
+    return exp >= now && exp <= thirtyDays;
+  }).length;
 
   // Set Metric Cards
-  document.getElementById('dashboard-outstanding-count').textContent = dashboardData.outstandingCount;
-  document.getElementById('dashboard-total-amount').textContent = formatCurrency(dashboardData.totalAmount);
-  document.getElementById('dashboard-margin-money').textContent = formatCurrency(dashboardData.totalMarginMoney);
+  document.getElementById('dashboard-outstanding-count').textContent = outstandingCount;
+  document.getElementById('dashboard-total-amount').textContent = formatCurrency(totalAmount);
+  document.getElementById('dashboard-margin-money').textContent = formatCurrency(totalMarginMoney);
 
   const urgentAlertsBadge = document.getElementById('dashboard-urgent-alerts');
-  urgentAlertsBadge.textContent = dashboardData.urgentCount;
+  urgentAlertsBadge.textContent = urgentCount;
 
   const metricUrgentCard = document.getElementById('metric-expiry-alerts');
-  if (dashboardData.urgentCount > 0) {
+  if (urgentCount > 0) {
     metricUrgentCard.className = 'metric-card danger';
   } else {
     metricUrgentCard.className = 'metric-card success';
@@ -677,16 +711,23 @@ async function loadDashboard() {
   const tbody = document.getElementById('dashboard-recent-tbody');
   tbody.innerHTML = '';
 
-  if (!dashboardData.recentBgs || dashboardData.recentBgs.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No guarantees registered yet.</td></tr>`;
+  const colSpanCount = isRe ? 8 : 7;
+  const recentBgs = [...bgsToUse].reverse().slice(0, 5);
+
+  if (!recentBgs || recentBgs.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="${colSpanCount}" style="text-align: center; color: var(--text-muted);">No guarantees registered yet.</td></tr>`;
   } else {
-    dashboardData.recentBgs.forEach(bg => {
+    recentBgs.forEach(bg => {
       const tr = document.createElement('tr');
       tr.style.cursor = 'pointer';
       tr.onclick = () => openDetailModal('bg', bg.id);
+
+      const companyCol = isRe ? `<td class="col-wrap" style="font-weight:600; color:var(--text-primary);">${bg.companyName || '—'}</td>` : '';
+
       tr.innerHTML = `
         <td style="font-weight:700; color: var(--color-primary);">${bg.id}</td>
         <td>${bg.bgNumber || '<i>Pending Issuance</i>'}</td>
+        ${companyCol}
         <td>${bg.bgType}</td>
         <td>${bg.beneficiary}</td>
         <td style="font-weight:600;">${formatCurrency(bg.bgAmount)}</td>
@@ -701,16 +742,9 @@ async function loadDashboard() {
   const alertList = document.getElementById('dashboard-alert-list');
   alertList.innerHTML = '';
 
-  // Fetch full register to find expiring items
-  const register = await fetchApi('/api/register');
-  allRegister = register;
-
-  const activeBgs = register.filter(bg => bg.status === 'Active' || bg.status === 'Expired');
-  const now = new Date();
-
-  // Find BGs expired or expiring within 45 days
+  const expiringAlertCandidates = bgsToUse.filter(bg => bg.status === 'Active' || bg.status === 'Expired');
   const alerts = [];
-  activeBgs.forEach(bg => {
+  expiringAlertCandidates.forEach(bg => {
     if (!bg.expiryDate) return;
     const exp = new Date(bg.expiryDate);
     const diffTime = exp.getTime() - now.getTime();
@@ -1205,10 +1239,13 @@ function populateBankFilterDropdown(register) {
 }
 
 function applyFilters() {
+  const isRe = currentUser && currentUser.companyRole === 'RE';
   const searchText = document.getElementById('filter-search').value.toLowerCase();
   const bgType = document.getElementById('filter-type').value;
   const status = document.getElementById('filter-status').value;
   const bankText = document.getElementById('filter-bank').value.toLowerCase();
+  const companyFilter = document.getElementById('filter-company');
+  const selectedCompany = (isRe && companyFilter) ? companyFilter.value.toLowerCase() : '';
   const expiryFilter = document.getElementById('filter-expiry').value;
 
   const now = new Date();
@@ -1235,6 +1272,9 @@ function applyFilters() {
     // Bank filter
     const matchesBank = !bankText || String(bg.issuingBank || '').toLowerCase().includes(bankText);
 
+    // Company filter
+    const matchesCompany = !selectedCompany || String(bg.companyName || '').toLowerCase() === selectedCompany;
+
     // Expiry filter
     let matchesExpiry = true;
     if (expiryFilter) {
@@ -1252,7 +1292,7 @@ function applyFilters() {
       }
     }
 
-    return matchesSearch && matchesType && matchesStatus && matchesBank && matchesExpiry;
+    return matchesSearch && matchesType && matchesStatus && matchesBank && matchesCompany && matchesExpiry;
   });
 
   // Update UI Counter
