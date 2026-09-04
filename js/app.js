@@ -13,6 +13,7 @@ let costCentersList = [];
 
 // Highrise ERP Cost Centers List
 const COST_CENTERS = [
+  'Admin',
   'ATS-Byculla Mumbai',
   'Bitsom Pilani - Kalyan, Mumbai',
   'BMC - Dahisar Hub',
@@ -30,6 +31,7 @@ const COST_CENTERS = [
   'Phoenix Mall - Mohali',
   'Police Housing - Kandivali',
   'Police Housing Goregaon',
+  'Pune Head Office (CC-101)',
   'Ratnagiri Air Terminal',
   'Ratnagiri Rly. Platform Beautification',
   'Redevelopment Of Ravi Shankar Shukla Market Bhopal',
@@ -101,35 +103,45 @@ async function loadCostCentersMaster() {
 
 function populateCostCenters() {
   const selects = [
-    document.getElementById('req-cost-center-select'),
-    document.getElementById('bg-form-cost-center-select'),
-    document.getElementById('cc-report-select')
+    { elem: document.getElementById('req-cost-center-select'), defaultText: '-- Select Cost Center --' },
+    { elem: document.getElementById('bg-form-cost-center-select'), defaultText: '-- Select Cost Center --' },
+    { elem: document.getElementById('cc-report-select'), defaultText: '-- All Cost Centers --' }
   ];
 
-  const listToUse = (costCentersList && costCentersList.length > 0) ? costCentersList : COST_CENTERS;
+  let listToUse = (costCentersList && costCentersList.length > 0) ? [...costCentersList] : [...COST_CENTERS];
 
-  selects.forEach(select => {
-    if (!select) return;
-    const currentVal = select.value;
-    select.innerHTML = '';
+  // Include cost centers from current register records if available
+  if (allRegister && Array.isArray(allRegister)) {
+    allRegister.forEach(bg => {
+      if (bg.costCenter && !listToUse.includes(bg.costCenter)) {
+        listToUse.push(bg.costCenter);
+      }
+    });
+  }
+
+  listToUse = [...new Set(listToUse)].sort((a, b) => a.localeCompare(b));
+
+  selects.forEach(({ elem, defaultText }) => {
+    if (!elem) return;
+    const currentVal = elem.value;
+    elem.innerHTML = '';
 
     const emptyOpt = document.createElement('option');
     emptyOpt.value = '';
-    emptyOpt.textContent = '-- Select Cost Center --';
-    emptyOpt.selected = true;
-    select.appendChild(emptyOpt);
+    emptyOpt.textContent = defaultText;
+    elem.appendChild(emptyOpt);
 
     listToUse.forEach(cc => {
       const opt = document.createElement('option');
       opt.value = cc;
       opt.textContent = cc;
-      select.appendChild(opt);
+      elem.appendChild(opt);
     });
 
     if (currentVal && listToUse.includes(currentVal)) {
-      select.value = currentVal;
+      elem.value = currentVal;
     } else {
-      select.value = '';
+      elem.value = '';
     }
   });
 }
@@ -2185,6 +2197,31 @@ async function submitBgRenewalRequest(event) {
 
 // --- 7. COST CENTRE WISE REPORT ---
 
+function isCostCenterMatch(bg, costCenter) {
+  if (!costCenter) return false;
+  const target = String(costCenter).trim().toLowerCase();
+  const bgCc = String(bg.costCenter || '').trim().toLowerCase();
+  const bgSite = String(bg.siteName || '').trim().toLowerCase();
+
+  // 1. Direct match check
+  if (bgCc === target || bgSite === target) return true;
+
+  // 2. Clean non-alphanumeric matching (e.g. handles "SSChandrpur" vs "SS Chandrapur")
+  const cleanTarget = target.replace(/[^a-z0-9]/g, '');
+  const cleanCc = bgCc.replace(/[^a-z0-9]/g, '');
+  const cleanSite = bgSite.replace(/[^a-z0-9]/g, '');
+
+  if (cleanTarget && (cleanCc === cleanTarget || cleanSite === cleanTarget)) return true;
+
+  // 3. Substring matching for site names / cost centers if clean target is at least 4 chars long
+  if (cleanTarget.length >= 4) {
+    if (cleanCc.length >= 4 && (cleanCc.includes(cleanTarget) || cleanTarget.includes(cleanCc))) return true;
+    if (cleanSite.length >= 4 && (cleanSite.includes(cleanTarget) || cleanTarget.includes(cleanSite))) return true;
+  }
+
+  return false;
+}
+
 function initCostCenterReport() {
   const select = document.getElementById('cc-report-select');
   if (!select) return;
@@ -2195,33 +2232,27 @@ function initCostCenterReport() {
   // Populate cost center options
   populateCostCenters();
 
-  if (previousValue && COST_CENTERS.includes(previousValue)) {
+  if (previousValue) {
     select.value = previousValue;
-    loadCostCenterReport(previousValue);
   } else {
-    // Clear display
-    document.getElementById('cc-total-count').textContent = '0';
-    document.getElementById('cc-total-value').textContent = '₹0';
-    document.getElementById('cc-total-margin').textContent = '₹0';
-    document.getElementById('cc-report-tbody').innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Please select a Cost Center above.</td></tr>`;
+    select.value = '';
   }
+
+  loadCostCenterReport(select.value);
 }
 
-async function loadCostCenterReport(costCenter) {
-  if (!costCenter) {
-    document.getElementById('cc-total-count').textContent = '0';
-    document.getElementById('cc-total-value').textContent = '₹0';
-    document.getElementById('cc-total-margin').textContent = '₹0';
-    document.getElementById('cc-report-tbody').innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Please select a Cost Center above.</td></tr>`;
-    return;
-  }
-
+async function loadCostCenterReport(costCenter = '') {
   // Fetch register database
   const register = await fetchApi('/api/register');
   allRegister = register;
 
-  // Filter for matching cost centers (excluding EMDs since they aren't bound to cost centers)
-  const filteredBgs = register.filter(bg => bg.costCenter === costCenter && bg.bgType !== 'EMD');
+  const selectedCc = String(costCenter || '').trim();
+  const isAll = !selectedCc;
+
+  // Filter for matching cost centers (if isAll, show all guarantees)
+  const filteredBgs = isAll
+    ? register
+    : register.filter(bg => isCostCenterMatch(bg, selectedCc));
 
   // Update summaries
   let totalCount = 0;
@@ -2236,16 +2267,21 @@ async function loadCostCenterReport(costCenter) {
     }
   });
 
-  document.getElementById('cc-total-count').textContent = totalCount;
-  document.getElementById('cc-total-value').textContent = formatCurrency(totalValue);
-  document.getElementById('cc-total-margin').textContent = formatCurrency(totalMargin);
+  const countElem = document.getElementById('cc-total-count');
+  const valElem = document.getElementById('cc-total-value');
+  const marginElem = document.getElementById('cc-total-margin');
+
+  if (countElem) countElem.textContent = totalCount;
+  if (valElem) valElem.textContent = formatCurrency(totalValue);
+  if (marginElem) marginElem.textContent = formatCurrency(totalMargin);
 
   // Render records
   const tbody = document.getElementById('cc-report-tbody');
+  if (!tbody) return;
   tbody.innerHTML = '';
 
   if (filteredBgs.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No Bank Guarantees recorded for this Cost Center.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--text-muted);">No Bank Guarantees recorded for ${isAll ? 'any Cost Center' : 'this Cost Center'}.</td></tr>`;
     return;
   }
 
@@ -2260,27 +2296,30 @@ async function loadCostCenterReport(costCenter) {
       <td class="col-wrap">${bg.beneficiary}</td>
       <td class="col-wrap">${bg.issuingBank || 'N/A'}</td>
       <td style="font-weight:600;">${formatCurrency(bg.bgAmount)}</td>
+      <td class="col-wrap" style="font-size:12.5px; font-weight:600; color:var(--text-secondary);">${bg.costCenter || bg.siteName || 'N/A'}</td>
       <td>${formatDate(bg.expiryDate)}</td>
-      <td><span class="badge badge-${bg.status.toLowerCase()}">${bg.status}</span></td>
+      <td><span class="badge badge-${(bg.status || 'active').toLowerCase()}">${bg.status}</span></td>
     `;
     tbody.appendChild(tr);
   });
 }
 
 function exportCostCenterCsv() {
-  const costCenter = document.getElementById('cc-report-select').value;
-  if (!costCenter) {
-    alert("Please select a Cost Center to export.");
-    return;
-  }
+  const select = document.getElementById('cc-report-select');
+  const costCenter = select ? select.value : '';
+  const selectedCc = String(costCenter || '').trim();
+  const isAll = !selectedCc;
 
-  const filteredBgs = allRegister.filter(bg => bg.costCenter === costCenter && bg.bgType !== 'EMD');
+  const filteredBgs = isAll
+    ? allRegister
+    : allRegister.filter(bg => isCostCenterMatch(bg, selectedCc));
+
   if (filteredBgs.length === 0) {
     alert("No records to export.");
     return;
   }
 
-  const headers = ['BG Ref ID', 'BG Number', 'BG Type', 'Beneficiary', 'Issuing Bank', 'Issue Date', 'Expiry Date', 'Amount (₹)', 'Margin Money (₹)', 'FDR No', 'Status', 'Remarks'];
+  const headers = ['BG Ref ID', 'BG Number', 'BG Type', 'Beneficiary', 'Issuing Bank', 'Issue Date', 'Expiry Date', 'Amount (₹)', 'Margin Money (₹)', 'FDR No', 'Cost Center', 'Status', 'Remarks'];
   let csvContent = headers.join(',') + '\n';
 
   filteredBgs.forEach(bg => {
@@ -2288,24 +2327,27 @@ function exportCostCenterCsv() {
       bg.id,
       bg.bgNumber || '',
       bg.bgType,
-      `"${bg.beneficiary.replace(/"/g, '""')}"`,
+      `"${(bg.beneficiary || '').replace(/"/g, '""')}"`,
       `"${(bg.issuingBank || '').replace(/"/g, '""')}"`,
       bg.issueDate || '',
       bg.expiryDate || '',
       bg.bgAmount || 0,
       bg.marginMoney || 0,
       bg.fdrNo || '',
+      `"${(bg.costCenter || bg.siteName || '').replace(/"/g, '""')}"`,
       bg.status,
       `"${(bg.remarks || '').replace(/"/g, '""')}"`
     ];
     csvContent += row.join(',') + '\n';
   });
 
+  const fileNameSuffix = isAll ? 'All_CostCenters' : costCenter.replace(/[^a-zA-Z0-9]/g, '_');
+
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.setAttribute("href", url);
-  link.setAttribute("download", `BG_CostCenter_Report_${costCenter.replace(/[^a-zA-Z0-9]/g, '_')}.csv`);
+  link.setAttribute("download", `BG_CostCenter_Report_${fileNameSuffix}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
