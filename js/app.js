@@ -1,5 +1,7 @@
 // App State
-const API_URL = ''; // Same domain for API calls
+const API_URL = (window.location.protocol === 'file:' || (window.location.port && window.location.port !== '8080' && window.location.port !== '80'))
+  ? 'http://localhost:8080'
+  : '';
 let currentRole = 'Finance Manager';
 let currentUser = {
   isLoggedIn: false
@@ -180,9 +182,11 @@ function updateAuthUI() {
     if (headerProfile) headerProfile.style.display = 'flex';
     if (headerSigninBtn) headerSigninBtn.style.display = 'none';
 
+    if (!currentUser.role) currentUser.role = 'Finance Manager';
+
     // Compute initials from username or name
-    const nameToUse = currentUser.username || currentUser.name || 'US';
-    const initials = nameToUse.split(/[._\s]/).map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'US';
+    const nameToUse = currentUser.name || currentUser.username || 'Vinod Deore';
+    const initials = nameToUse.split(/[._\s]/).filter(Boolean).map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'VD';
 
     if (nameDisplay) nameDisplay.textContent = nameToUse;
     if (roleDisplay) roleDisplay.textContent = currentUser.role;
