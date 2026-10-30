@@ -1053,6 +1053,8 @@ async function loadRegister() {
 
     tr.style.cursor = 'pointer';
     tr.onclick = () => openDetailModal('bg', bg.id);
+    tr.setAttribute('data-id', bg.id);
+    tr.setAttribute('data-status', effectiveStatus);
     tr.setAttribute('data-amount', bg.bgAmount || 0);
     tr.setAttribute('data-margin', bg.marginMoney || 0);
     tr.setAttribute('data-bank', bg.issuingBank || '');
@@ -1141,8 +1143,12 @@ function filterRegisterTable(query) {
     row.style.display = isVisible ? '' : 'none';
 
     if (isVisible) {
-      totalBgAmount += parseFloat(row.getAttribute('data-amount') || 0);
-      totalMarginMoney += parseFloat(row.getAttribute('data-margin') || 0);
+      const status = (row.getAttribute('data-status') || '').toLowerCase().trim();
+      // Only include Active and Expired in total, exclude Cancelled
+      if (status === 'active' || status === 'expired') {
+        totalBgAmount += parseFloat(row.getAttribute('data-amount') || 0);
+        totalMarginMoney += parseFloat(row.getAttribute('data-margin') || 0);
+      }
     }
   });
 
@@ -1152,7 +1158,7 @@ function filterRegisterTable(query) {
   if (marginDisplay) marginDisplay.textContent = formatCurrency(totalMarginMoney);
 }
 
-// Export BG Register to CSV
+// Export BG Register to CSV (respects active bank filter, search, and company filters)
 function exportRegisterCsv() {
   if (!allRegister || allRegister.length === 0) {
     alert('No BG records available to export.');
@@ -1162,10 +1168,59 @@ function exportRegisterCsv() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  // Collect records based on active visible filters in the table
+  let recordsToExport = [];
+  const rows = document.querySelectorAll('#register-tbody tr[data-id]');
+
+  if (rows && rows.length > 0) {
+    const bgMap = new Map(allRegister.map(bg => [String(bg.id), bg]));
+    rows.forEach(r => {
+      if (r.style.display !== 'none') {
+        const id = r.getAttribute('data-id');
+        const bg = bgMap.get(id);
+        if (bg) recordsToExport.push(bg);
+      }
+    });
+  } else {
+    const isRe = currentUser && currentUser.companyRole === 'RE';
+    const searchInput = document.getElementById('register-search');
+    const bankSelect = document.getElementById('register-bank-filter');
+    const companySelect = document.getElementById('register-company-filter');
+
+    const q = (searchInput ? searchInput.value : '').toLowerCase().trim();
+    const selectedBank = bankSelect ? bankSelect.value.toLowerCase().trim() : '';
+    const selectedCompany = (isRe && companySelect) ? companySelect.value.toLowerCase().trim() : '';
+
+    recordsToExport = allRegister.filter(bg => {
+      let effectiveStatus = bg.status;
+      if (bg.status === 'Active' && bg.expiryDate) {
+        const expDate = new Date(bg.expiryDate);
+        if (!isNaN(expDate.getTime()) && expDate < today) effectiveStatus = 'Expired';
+      }
+
+      const searchStr = [
+        bg.id, bg.bgNumber, bg.companyName || '', bg.bgType, bg.beneficiary, bg.issuingBank, bg.siteName, effectiveStatus
+      ].join(' ').toLowerCase();
+
+      const searchMatch = !q || searchStr.includes(q);
+      const rowBank = (bg.issuingBank || '').toLowerCase().trim();
+      const bankMatch = !selectedBank || rowBank === selectedBank || rowBank.includes(selectedBank);
+      const rowCompany = (bg.companyName || '').toLowerCase().trim();
+      const companyMatch = !selectedCompany || rowCompany === selectedCompany;
+
+      return searchMatch && bankMatch && companyMatch;
+    });
+  }
+
+  if (recordsToExport.length === 0) {
+    alert('No matching BG records found to export.');
+    return;
+  }
+
   const headers = ['BG Ref ID', 'BG Number', 'BG Type', 'Beneficiary', 'Client / Project', 'Site Name', 'Issuing Bank', 'Issue Date', 'Expiry Date', 'Amount', 'Commission', 'Margin Money', 'FDR No', 'Cost Center', 'Status', 'Amendments Count', 'Remarks'];
   let csv = headers.join(',') + '\n';
 
-  allRegister.forEach(bg => {
+  recordsToExport.forEach(bg => {
     let effectiveStatus = bg.status;
     if (bg.status === 'Active' && bg.expiryDate) {
       const expDate = new Date(bg.expiryDate);
